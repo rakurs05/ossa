@@ -83,11 +83,11 @@ git clone https://github.com/AlexTunder/ossa.git
 
 ## Авторы и разработчики
 
-* **AlexThunder** — *Работа с низкоуровневой частью* — [Github Profile](https://github.com/AlexTunder)
+* **AlexThunder** — *Работа с низкоуровневой частью* — [BitBicket Profile](https://bitbucket.org/alextunders/)
 
-* **Andrezoo** — *Документация и front-end* — [Github Profile](https://github.com/andrezoo)
+* **Andrezoo** — *Документация и front-end* — [BitBicket Profile](https://bitbucket.org/bjorrain/)
 
 * **Bjorrain** — *Сетевая часть, безопастность и протоколы*
 
-* **whtntr** - *GUI* [Github Profile](https://github.com/whtntr)
+* **whtntr** - *GUI* [BitBicket Profile](https://bitbucket.org/myrkon/)
 ----
