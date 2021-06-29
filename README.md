@@ -93,9 +93,9 @@ git clone https://github.com/AlexTunder/ossa.git
 
 * **AlexThunder** — *Работа с низкоуровневой частью* — [BitBicket Profile](https://bitbucket.org/alextunders/)
 
-* **Andrezoo** — *Документация и front-end* — [BitBicket Profile](https://bitbucket.org/bjorrain/)
+* **Andrezoo** — *Документация и front-end* — 
 
-* **Bjorrain** — *Сетевая часть, безопастность и протоколы*
+* **Bjorrain** — *Сетевая часть, безопастность и протоколы* [BitBicket Profile](https://bitbucket.org/bjorrain/)
 
 * **whtntr** - *GUI* [BitBicket Profile](https://bitbucket.org/myrkon/)
 
