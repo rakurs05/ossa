@@ -6,9 +6,11 @@
 
 #define CLIST_CONST_BUFFER_SIZE           1024
 
+#ifndef __cplusplus
 #define astype(type) *(type*)
 #define new(type) (type*)malloc(sizeof(type))
 #define news(type,count) (type*)malloc(sizeof(type)*count)
+#endif
 
 #define CLIST_ERROR_ANY_ADDR              0x0
 #define CLIST_ERROR_NULL_ARG              0x0
@@ -35,6 +37,7 @@ struct __booster_info{
     #ifndef OSSA_STDLIST
         #define ossalist(type) struct __list
     #else
+        #include <list>
         #define ossalist(type) std::list <type>
     #endif
 #endif
@@ -68,8 +71,8 @@ ossaMessage makeMes(ossastr body, ossaUID sender, long long time);
 
 struct ossaChat{
     ossastr title;
-    ossalist(Message) messages;
-    ossalist(User) userlist;
+    ossalist(ossaMessage) messages;
+    ossalist(ossaUser) userlist;
     struct Plugin *plugin;
 };
 
