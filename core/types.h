@@ -68,6 +68,7 @@ struct Chat{
     ossastr title;
     ossalist(Message) messages;
     ossalist(User) userlist;
+    struct Plugin *plugin;
 };
 
 struct Plugin{
@@ -86,15 +87,21 @@ struct Plugin{
         int (*renameMe)(ossastr);
         ossaUser (*myInfo)();
         //Second-level
-        int (*makeChat)(ossastr);
-        ossastr (*getChatSettings)();
-        int (*inviteToChat)(struct Chat*, ossastr);
+        // int (*inviteToChat)(struct Chat*, ossastr); // перемещено в chatAction
         int (*deleteUser)(struct Chat*, ossaUID);
         int (*sendMes)(struct Chat*, ossaUID);
         int (*editMes)(struct Chat*, ossaMID);
-        int (*chatAction)(struct Chat*, ossastr action); //сделаю как просто вызов void-функции, если это равно 0x0
+        //Third-level
+        int (*makeChat)(ossastr);
+        ossastr (*getChatSettings)();
+        int (*setChatSettings)(struct Chat*, ossastr, ossastr);
         int (*checkChatEvent)(struct Chat*);
+        int (*chatAction)(struct Chat*, ossastr); //(target chat, action) сделаю как просто вызов void-функции, если это равно 0x0
+        int loadChat(struct Chat*, ossastr); //(target chat, src) if src in 0x0, read from Chat
+        int saveChat(struct Chat*, ossastr); //Same as upper
+
     }call;
+    //Structure calls
     int (*init)();
     int (*destr)();
     //Metadata
