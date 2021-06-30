@@ -1,7 +1,11 @@
 #ifndef OSSA_H
 #define OSSA_H
-struct Message{
-    char *body;
+#include "./types.h"
+#ifndef CORE_CPP
+    #include "./dlist/list.h"
+#endif
 
-};
+ossastr getChatSettings(struct Chat *chat, );
+void setChat
+
 #endif  

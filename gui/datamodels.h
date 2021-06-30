@@ -7,8 +7,6 @@
 using namespace std;
 
 
-
-
 struct User {
     string nickName;
     unsigned int userId;

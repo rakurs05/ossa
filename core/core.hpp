@@ -2,5 +2,5 @@
 #include "./core.h"
 
 class Core{
-
+    
 };
