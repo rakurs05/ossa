@@ -64,14 +64,14 @@ ossaUID getMessageSender(ossaMessage mes);
 ossastr getMessageHead(ossaMessage mes);
 ossaMessage makeMes(ossastr body, ossaUID sender, long long time);
 
-struct Chat{
+struct ossaChat{
     ossastr title;
     ossalist(Message) messages;
     ossalist(User) userlist;
     struct Plugin *plugin;
 };
 
-struct Plugin{
+struct ossaPlugin{
     //Shared data
     void *libEntity;
     struct __PLUGIN_CALLS__{

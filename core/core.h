@@ -1,21 +1,24 @@
+#pragma once
 #ifndef OSSA_H
 #define OSSA_H
 #include "./types.h"
-#ifndef CORE_CPP
+#ifndef OSSA_CPP
     #include "./dlist/list.h"
 
     int makeChat(ossastr title);
-    int setChatSettings(struct Chat* _this, ossastr field, ossastr data);
-    ossastr getChatSettings(struct Chat* _this);
-    int inviteToChat(struct Chat* _this, ossastr globalUID);
-    int deleteUser(struct Chat* _this, ossaUID uid, ossastr additional);
-    int sendMessage(struct Chat *_this, ossaMessage message);
-    ossaMessage makeMessage(struct Chat *_this, ossastr body, ossalist(ossastr) attachments);
-    int editMessage(struct Chat *_this, ossaMID mid, ossaMessage edited);
-    int chatAction(struct Chat *_this, ossastr action_name);
-    int chechChatEvent(struct Chat *_this);
-    int exportChat(struct Chat *_this, char _location_type, ossastr location);
-    int importChat(struct Chat *_this, char _location_type, ossastr location);
-    
+    int setChatSettings(struct ossaChat* _this, ossastr field, ossastr data);
+    ossalist(ossastr) getChatSettings(struct ossaChat* _this);
+    int inviteToChat(struct ossaChat* _this, ossastr globalUID);
+    int deleteUser(struct ossaChat* _this, ossaUID uid, ossastr additional);
+    int sendMessage(struct ossaChat *_this, ossaMessage message);
+    ossaMessage makeMessage(struct ossaChat *_this, ossastr body, ossalist(ossastr) attachments);
+    int editMessage(struct ossaChat *_this, ossaMID mid, ossaMessage edited);
+    int chatAction(struct ossaChat *_this, ossastr action_name);
+    int chechChatEvent(struct ossaChat *_this);
+    int exportChat(struct ossaChat *_this, ossastr location);
+    int importChat(struct ossaChat *_this, ossastr location);
+
+    int loadChatPlugin(struct ossaChat *_this, ossastr path);
+
 #endif
 #endif  
