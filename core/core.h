@@ -4,7 +4,7 @@
 #include "./types.h"
 #ifndef OSSA_CPP
     #include "./dlist/list.h"
-
+#endif
     int makeChat(ossastr title);
     int setChatSettings(struct ossaChat* _this, ossastr field, ossastr data);
     ossalist(ossastr) getChatSettings(struct ossaChat* _this);
@@ -19,6 +19,4 @@
     int importChat(struct ossaChat *_this, ossastr location);
 
     int loadChatPlugin(struct ossaChat *_this, ossastr path);
-
-#endif
 #endif  

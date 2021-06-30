@@ -31,10 +31,12 @@ struct __booster_info{
     int index, error;
 };
 
-#ifndef OSSA_STDLIST
-    #define ossalist(type) struct __list
-#else
-    #define ossalist(type) std::list <type>
+#ifndef ossalist
+    #ifndef OSSA_STDLIST
+        #define ossalist(type) struct __list
+    #else
+        #define ossalist(type) std::list <type>
+    #endif
 #endif
 
 #ifdef OSSA_CTU

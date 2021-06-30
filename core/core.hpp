@@ -1,4 +1,5 @@
 #define OSSA_CPP
+#define OSSA_STDLIST
 #include "./core.h"
 
 namespace  ossa{
@@ -18,7 +19,7 @@ class OssaPlugin{
         void unauth();
 
         ossalist(OssaChat) getChats();
-
+        OssaPlugin(ossastr path);
 };
 
 class OssaChat{
