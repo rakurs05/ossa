@@ -12,7 +12,7 @@ extern struct __list_booster makeEmptyBooster(unsigned int pointRate);
 
 /* Basic lists (list) functions */
 extern void *listGet(struct __list *_this, int index);
-unsigned int listFind(struct __list *_this, const void *data, char (*compare)(const void *target, void *object));
+long listFind(struct __list *_this, const void *data, char (*compare)(const void *, void *)); //return -1 if no item in this
 extern struct __list *listFrame(struct __list *_this, int index);
 extern int listAppendLink(struct __list *_this, void *data);
 extern int listAppend(struct __list *_this, void *data, unsigned int size);

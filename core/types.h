@@ -1,8 +1,14 @@
 #pragma once
 
+#define OSSA_OK         0x0
+#define OSSA_WAIT       0x1
+#define OSSA_ACCPEPT    0x2
+#define OSSA_DECLINE    0x3
+#define OSSA_ALREADY    0x4
+
 #define ossaUID unsigned long
 #define ossaMID unsigned long
-#define ossastr const char *
+#define ossastr char *
 
 #define CLIST_CONST_BUFFER_SIZE           1024
 
@@ -61,6 +67,34 @@ struct _User{
 #define ossaUser struct _User
 #endif
 
+struct __PLUGIN_CALLS__{
+    //Zero-level
+    int (*connect)();
+    int (*disconnect)();
+    int (*state)();
+    ossastr (*info)();
+    //First-level
+    int (*auth)(ossastr,ossastr);
+    int (*oauth)(ossastr);
+    int (*exit)();
+    int (*renameMe)(ossastr);
+    ossaUser (*myInfo)();
+    ossaUser (*globalUIDInfo)(ossastr)
+    //Second-level
+    int (*inviteToChat)(struct Chat*, ossastr); // перемещено в chatAction
+    int (*deleteUser)(struct Chat*, ossaUID);
+    int (*sendMes)(struct Chat*, ossaUID);
+    int (*editMes)(struct Chat*, ossaMID);
+    //Third-level
+    int (*makeChat)(ossastr);
+    ossastr (*getChatSettings)();
+    int (*setChatSettings)(struct Chat*, ossastr, ossastr);
+    int (*checkChatEvent)(struct Chat*);
+    int (*chatAction)(struct Chat*, ossastr); //(target chat, action) сделаю как просто вызов void-функции, если это равно 0x0
+    int loadChat(struct Chat*, ossastr); //(target chat, src) if src in 0x0, read from Chat
+    int saveChat(struct Chat*, ossastr); //Same as upper
+};
+
 ossaUID getUidFromUser(ossaUser user);
 ossastr getUsernameFromUser(ossaUser user);
 
@@ -73,39 +107,14 @@ struct ossaChat{
     ossastr title;
     ossalist(ossaMessage) messages;
     ossalist(ossaUser) userlist;
-    struct Plugin *plugin;
+    ossalist(ossastr) settings;
+    struct ossaPlugin *plugin;
 };
 
 struct ossaPlugin{
     //Shared data
     void *libEntity;
-    struct __PLUGIN_CALLS__{
-        //Zero-level
-        int (*connect)();
-        int (*disconnect)();
-        int (*state)();
-        ossastr (*info)();
-        //First-level
-        int (*auth)(ossastr,ossastr);
-        int (*oauth)(ossastr);
-        int (*exit)();
-        int (*renameMe)(ossastr);
-        ossaUser (*myInfo)();
-        //Second-level
-        // int (*inviteToChat)(struct Chat*, ossastr); // перемещено в chatAction
-        int (*deleteUser)(struct Chat*, ossaUID);
-        int (*sendMes)(struct Chat*, ossaUID);
-        int (*editMes)(struct Chat*, ossaMID);
-        //Third-level
-        int (*makeChat)(ossastr);
-        ossastr (*getChatSettings)();
-        int (*setChatSettings)(struct Chat*, ossastr, ossastr);
-        int (*checkChatEvent)(struct Chat*);
-        int (*chatAction)(struct Chat*, ossastr); //(target chat, action) сделаю как просто вызов void-функции, если это равно 0x0
-        int loadChat(struct Chat*, ossastr); //(target chat, src) if src in 0x0, read from Chat
-        int saveChat(struct Chat*, ossastr); //Same as upper
-
-    }call;
+    struct __PLUGIN_CALLS__ pcall;
     //Structure calls
     int (*init)();
     int (*destr)();

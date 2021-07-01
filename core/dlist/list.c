@@ -168,6 +168,8 @@ int earaseList(struct __list *_this){
     return 0;
 }
 int listRemove(struct __list *_this, int index){
+    if(index < 0)
+        return -2;
     if(index == 0){
         if(_this->next == 0x0){
             if(_this->data != 0x0)
@@ -196,11 +198,11 @@ int listRemove(struct __list *_this, int index){
     prev->next = next;
     return listLen(_this);
 }
-unsigned int listFind(struct __list *_this, const void *data, char (*compare)(const void *target, void *object)){
+long listFind(struct __list *_this, const void *data, char (*compare)(const void *target, void *object)){
     unsigned int len = listLen(_this);
     for(int i = 0; i < len; i++){
         if(compare(data, listGet(_this, i)))
             return i;
     }
-    return 0x0;
+    return -1;
 }
