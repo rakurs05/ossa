@@ -2,6 +2,18 @@
 #include "dlist/list.h"
 #include <math.h>
 #include <stdio.h>
+#include <string.h>
+#include <zip.h>
+#ifdef __linux
+    // #include <unistd.h>
+    #include <sys/stat.h>
+#endif
+
+#define OSSA_CORE_VERSION "0.3-AS(D)"
+
+#ifndef OSSA_CORE_MAXHEADER
+    #define OSSA_CORE_MAXHEADER 1024
+#endif
 
 /* internel */
 char checkValidPlugin(struct ossaPlugin *plugin){
@@ -76,4 +88,84 @@ int deleteUser(struct ossaChat* _this, ossaUID uid, ossastr additional){
     }
     earaseList(&argv);
     return code;
+}
+
+int sendMessage(struct ossaChat *_this, ossaMessage message){
+    listAppend(&_this->messages, &message, sizeof(ossaMessage));
+    return updateChat(_this);
+}
+
+ossaMessage makeMessage(struct ossaChat *_this, ossastr body, ossalist(ossastr) attachments){
+    ossaMessage me;
+    me.uid = astype(ossaUID) listGet(&_this->userlist, 0); //0th user is always 'me'
+    me.body = body;
+    me.attach = attachments;
+    return me;
+}
+
+int editMessage(struct ossaChat *_this, ossaMID mid, ossaMessage edited){
+    astype(ossaMessage) listGet(&_this->userlist, mid) = edited;
+    return updateChat(_this);
+}
+
+int chatAction(struct ossaChat *_this, ossastr action_name, ossalist(ossastr) args){
+    char argv[5120];
+    memset(argv, 0, 5120);
+        strcat(argv, "\2");
+    strcpy(argv, action_name);
+    for(int i = 0; i < listLen(&args); i++){
+        strcat(argv, (char*)listGet(&args, i));
+        strcat(argv, "\28");
+    }
+        strcat(argv, "\3");
+    return _this->plugin->pcall.chatAction(_this, argv);
+}
+
+int updateChat(struct ossaChat *_this){
+    return _this->plugin->pcall.updateChat(_this);
+}
+
+int exportChat(struct ossaChat *_this, ossastr location){
+    struct stat stats;
+    ossastr final = location;
+
+    if(stat(location, &stats) == 0){
+        if(S_ISDIR(stats.st_mode)){
+            //if it directory, we should place
+            final = malloc(strlen(location)+strlen("/drop.ossadrop"));
+            sprintf(final, "%s/drop.ossadrop", location);
+        }
+    }else{
+        // fprintf(stderr, "[!!] OSSA Core: Fatal error: failed to stat \'%s\'!\n");
+    }
+    int err = 0;
+    zip_t *drop = zip_open(location, ZIP_CREATE, &err);
+    if(err != 0){
+        fprintf(stderr, "[!!] OSSA Core: Fatal error: failed to open \'%s\' for writing, %s", location, zip_strerror(drop));
+        return err;
+    }
+    { //Writing header
+        char headerdata[OSSA_CORE_MAXHEADER];
+        sprintf(headerdata, "{\"desc\":\"OSSA Chat Archive Header File\",");
+        sprintf(headerdata, "\"OSSA Core version\":\"%s\",", OSSA_CORE_VERSION);
+        sprintf(headerdata, "\"messages_count\":%i,", listLen(&_this->messages));
+        sprintf(headerdata, "\"users_count\":%i,", listLen(&_this->userlist));
+        sprintf(headerdata, "\"plugin\":{");
+        sprintf(headerdata, "\"name\":\"%s\",", _this->plugin->name);
+        sprintf(headerdata, "\"location\":\"%s\",", _this->plugin->loaction);
+        sprintf(headerdata, "},");
+        sprintf(headerdata, "\"settings\":[");
+        for(int i = 0; i < listLen(&_this->settings); i++){
+            sprintf(headerdata, "\"%s\",", (char*)listGet(&_this->settings, i));
+        }
+        sprintf(headerdata, "]}");
+        zip_source_t *s;
+        if((s = zip_source_buffer(drop, headerdata, sizeof(headerdata), 0)) == 0x0||
+        zip_file_add(drop, "header.json", s, ZIP_FL_ENC_UTF_8) < 0){
+            zip_source_free(s);
+            fprintf(stderr, "[!!] OSSA Core: Fatal error: failed to write header: %s",\
+                zip_strerror(drop));
+        }
+    }
+    zip_close(drop);
 }

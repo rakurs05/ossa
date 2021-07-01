@@ -14,7 +14,7 @@
     ossaMessage makeMessage(struct ossaChat *_this, ossastr body, ossalist(ossastr) attachments);
     int editMessage(struct ossaChat *_this, ossaMID mid, ossaMessage edited);
     int chatAction(struct ossaChat *_this, ossastr action_name, ossalist(ossastr) args);
-    int chechChatEvent(struct ossaChat *_this);
+    int updateChat(struct ossaChat *_this);
     int exportChat(struct ossaChat *_this, ossastr location);
     int importChat(struct ossaChat *_this, ossastr location);
 
