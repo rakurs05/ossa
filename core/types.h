@@ -5,6 +5,7 @@
 #define OSSA_ACCPEPT    0x2
 #define OSSA_DECLINE    0x3
 #define OSSA_ALREADY    0x4
+#define OSSA_NOUSER     0x5
 
 #define ossaUID unsigned long
 #define ossaMID unsigned long
@@ -79,10 +80,10 @@ struct __PLUGIN_CALLS__{
     int (*exit)();
     int (*renameMe)(ossastr);
     ossaUser (*myInfo)();
-    ossaUser (*globalUIDInfo)(ossastr)
+    ossaUser (*globalUIDInfo)(ossastr);
     //Second-level
-    int (*inviteToChat)(struct Chat*, ossastr); // перемещено в chatAction
-    int (*deleteUser)(struct Chat*, ossaUID);
+    // int (*inviteToChat)(struct Chat*, ossastr); // перемещено в chatAction
+    // int (*deleteUser)(struct Chat*, ossaUID, ossastr); // перемещено в chatAction
     int (*sendMes)(struct Chat*, ossaUID);
     int (*editMes)(struct Chat*, ossaMID);
     //Third-level
@@ -91,8 +92,8 @@ struct __PLUGIN_CALLS__{
     int (*setChatSettings)(struct Chat*, ossastr, ossastr);
     int (*checkChatEvent)(struct Chat*);
     int (*chatAction)(struct Chat*, ossastr); //(target chat, action) сделаю как просто вызов void-функции, если это равно 0x0
-    int loadChat(struct Chat*, ossastr); //(target chat, src) if src in 0x0, read from Chat
-    int saveChat(struct Chat*, ossastr); //Same as upper
+    int (*loadChat)(struct Chat*, ossastr); //(target chat, src) if src in 0x0, read from Chat
+    int (*saveChat)(struct Chat*, ossastr); //Same as upper
 };
 
 ossaUID getUidFromUser(ossaUser user);
@@ -124,6 +125,9 @@ struct ossaPlugin{
     //Resolves
     ossalist(ossastr) resolved_net; //resolved network connections
     ossalist(ossastr) resolved_loc; //resolved local files access
+    // //Constants as NULL
+    // ossaUser noUser;
+    // ossaMessage noMessage; //deleted message, for example
 };
 
 #define lnothing (struct __list){0x0, 0x0}

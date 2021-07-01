@@ -1,7 +1,7 @@
 gssa-main.cpp:
 	@echo [CC] Building ./gui/main.cpp
 	@$(CXX) ./gui/main.cpp $(CXXFLAGS) -o ./bin/gssa
-gssa: gssa-main.cpp
+ossa_gui: gssa-main.cpp
 core-core.c:
 	@echo [CC] Building ./core/core.c
 	@$(CC) ./core/core.c $(CFLAGS) -c -o ./bin/core.a

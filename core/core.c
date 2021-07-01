@@ -1,6 +1,7 @@
 #include "./core.h"
 #include "dlist/list.h"
-#include <cstdio>
+#include <math.h>
+#include <stdio.h>
 
 /* internel */
 char checkValidPlugin(struct ossaPlugin *plugin){
@@ -48,15 +49,31 @@ ossalist(ossastr) getChatSettings(struct ossaChat* _this){
 
 int inviteToChat(struct ossaChat* _this, ossastr globalUID){
     ossaUser newUser = _this->plugin->pcall.globalUIDInfo(globalUID);
+    if(newUser.nickname == 0x0){
+        //No user
+        return OSSA_NOUSER;
+    }
     if(listFind(&_this->userlist, &newUser, find_user)){
         return OSSA_ALREADY;
     }
-    int code = chatAction(_this, "invite", {globalUID, 0x0});
+    int code = chatAction(_this, "invite", (ossalist(ossastr)){globalUID, 0x0});
     if(code == OSSA_OK || code == OSSA_ACCPEPT){
-
-    }else if(code == OSSA_WAIT){
-
-    }else if(code == OSSA_DECLINE){
-
+        listAppend(&_this->userlist, &newUser, sizeof(ossaUser));
     }
+    return code;
+}
+
+int deleteUser(struct ossaChat* _this, ossaUID uid, ossastr additional){
+    ossalist(ossastr) argv = makeEmptyList();
+    int charscount = ((ceil(log10(uid))+1)*sizeof(char));
+    char *j = malloc(charscount+1);
+    sprintf(j, "%lu", uid);
+    listAppend(&argv, j, charscount+1);
+    listAppend(&argv, additional, strlen(additional));
+    int code = chatAction(_this, "userdel", argv);
+    if(code == OSSA_OK){
+        listRemove(&_this->userlist, uid);
+    }
+    earaseList(&argv);
+    return code;
 }
