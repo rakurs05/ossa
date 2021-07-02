@@ -68,15 +68,7 @@ struct __booster_info{
 #define Role void *
 
 #else
-struct _Message{
-    ossastr body;
-    ossalist(ossastr) attach;
-    ossaUID uid;
-};
-struct _User{
-    ossastr nickname;
-    ossastr head;
-};
+#include "./mhs.h"
 #define ossaMessage struct _Message
 #define ossaUser struct _User
 #endif

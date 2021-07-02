@@ -1,4 +1,5 @@
-#pragma once
+#ifndef DLIST_H
+#define DLIst_H
 
 #include "../types.h"
 #include <stdlib.h>
@@ -42,3 +43,5 @@ extern struct __booster_info __boster_py_toString(struct __list_booster *_this, 
 /* For low-level */
 extern void *__booster_make_C_arr(struct __list_booster *_this, unsigned int _element_size, unsigned int _elements_count);
 extern void *__booster_Write_C_arr(struct __list_booster *_this, unsigned int _element_size, unsigned int _elements_count);
+
+#endif
