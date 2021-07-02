@@ -1,7 +1,7 @@
 #ifndef OSSA_MUSTHAVE_TYPES
 #define OSSA_MUSTHAVE_TYPES
 #ifndef ossalist
- #include "./dlist/list.h"
+ #include "./list.h"
  #define ossalist(type) struct __list
 #endif
 #ifndef ossastr
@@ -19,4 +19,6 @@ struct _User{
     ossastr nickname;
     ossastr head;
 };
+#define ossaMessage struct _Message
+#define ossaUser struct _User
 #endif

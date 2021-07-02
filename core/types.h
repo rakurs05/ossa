@@ -24,44 +24,6 @@
 #define ossaCID unsigned int
 #define ossastr char *
 
-#define CLIST_CONST_BUFFER_SIZE           1024
-
-#ifndef __cplusplus
-#define astype(type) *(type*)
-#define new(type) (type*)malloc(sizeof(type))
-#define news(type,count) (type*)malloc(sizeof(type)*count)
-#endif
-
-#define CLIST_ERROR_ANY_ADDR              0x0
-#define CLIST_ERROR_NULL_ARG              0x0
-#define CLIST_ERROR_INDEX_OUT_OF_BOUND    0x0
-
-struct __list{
-    void *data;
-    struct __list *next;
-};
-
-struct __list_booster{
-    struct __list **points, *end;
-    int pointsCount, len, info;
-    void (*compare)(void *a, void *b);
-    void (*destruct)(void *data);
-};
-
-struct __booster_info{
-    void *target;
-    int index, error;
-};
-
-#ifndef ossalist
-    #ifndef OSSA_STDLIST
-        #define ossalist(type) struct __list
-    #else
-        #include <list>
-        #define ossalist(type) std::list <type>
-    #endif
-#endif
-
 #ifdef OSSA_CTU
 #define Message void *
 #define User void *
@@ -71,6 +33,15 @@ struct __booster_info{
 #include "./mhs.h"
 #define ossaMessage struct _Message
 #define ossaUser struct _User
+#endif
+
+#ifndef ossalist
+    #ifndef OSSA_STDLIST
+        #define ossalist(type) struct __list
+    #else
+        #include <list>
+        #define ossalist(type) std::list <type>
+    #endif
 #endif
 
 struct ossaChat;

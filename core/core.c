@@ -1,6 +1,5 @@
 #include "./core.h"
 #include "dlist/list.h"
-#include <math.h>
 #include <stdio.h>
 #include <string.h>
 #include <zip.h>
@@ -78,7 +77,7 @@ int inviteToChat(struct ossaChat* _this, ossastr globalUID){
 
 int deleteUser(struct ossaChat* _this, ossaUID uid, ossastr additional){
     ossalist(ossastr) argv = makeEmptyList();
-    int charscount = ((ceil(log10(uid))+1)*sizeof(char));
+    int charscount = 1024; // ((ceil(log10(uid))+1)*sizeof(char)); /* ибо пошли нахуй все эти "умные" формулы, сюка" */
     char *j = malloc(charscount+1);
     sprintf(j, "%lu", uid);
     listAppend(&argv, j, charscount+1);
@@ -119,11 +118,11 @@ int chatAction(struct ossaChat *_this, ossastr action_name, ossalist(ossastr) ar
         strcat(argv, "\28");
     }
         strcat(argv, "\3");
-    return _this->plugin->pcall.chatAction(_this, argv);
+    return _this->plugin->pcall.chatAction(0, argv);
 }
 
 int updateChat(struct ossaChat *_this){
-    return _this->plugin->pcall.updateChat(_this);
+    return _this->plugin->pcall.updateChat(0);
 }
 
 int exportChat(struct ossaChat *_this, ossastr location){
@@ -190,7 +189,7 @@ int loadChatPlugin(struct ossaPlugin *_this, ossastr path){
     _this->pcall.exit = (int(*)())dlsym(entity, "plugin_user_exit");
     _this->pcall.renameMe = (int(*)(ossastr))dlsym(entity, "plugin_user_rename");
     _this->pcall.myInfo = (ossaUser(*)())dlsym(entity, "plugin_user_info");
-    _this->pcall.globalUIDInfo = (ossaUser(*)(char*))dlsym(entity, "plugin_user_info");
+    _this->pcall.globalUIDInfo = (ossaUser(*)(ossastr))dlsym(entity, "plugin_user_ginfo");
 
     _this->pcall.sendMes = (int(*)(ossaCID, ossaMessage))dlsym(entity, "plugin_message_send");
     _this->pcall.editMes = (int(*)(ossaCID, ossaMessage, ossaMID))dlsym(entity, "plugin_message_edit");
@@ -203,5 +202,8 @@ int loadChatPlugin(struct ossaPlugin *_this, ossastr path){
     _this->pcall.saveChat = (int(*)(ossaCID, ossastr))dlsym(entity,"plugin_chat_save");
     _this->pcall.getChatList = (char*(*)())dlsym(entity,"plugin_chat_list");
 
+}
+
+int main(){
 
 }

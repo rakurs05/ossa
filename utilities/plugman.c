@@ -1,0 +1,1 @@
+/* plugins manager. Helps develop and manage (get info, test, check, build, install) plugins */

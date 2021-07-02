@@ -19,4 +19,5 @@
     int importChat(struct ossaChat *_this, ossastr location);
 
     int loadChatPlugin(struct ossaPlugin *_this, ossastr path);
+    int unloadChatPlugin(struct ossaPlugin *_this, ossastr path);
 #endif  

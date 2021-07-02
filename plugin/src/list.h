@@ -1,21 +1,6 @@
 #ifndef DLIST_H
 #define DLIST_H
 
-#include <stdlib.h>
-#include <string.h>
-
-#define CLIST_CONST_BUFFER_SIZE           1024
-
-#ifndef __cplusplus
-#define astype(type) *(type*)
-#define new(type) (type*)malloc(sizeof(type))
-#define news(type,count) (type*)malloc(sizeof(type)*count)
-#endif
-
-#define CLIST_ERROR_ANY_ADDR              0x0
-#define CLIST_ERROR_NULL_ARG              0x0
-#define CLIST_ERROR_INDEX_OUT_OF_BOUND    0x0
-
 struct __list{
     void *data;
     struct __list *next;
@@ -32,6 +17,9 @@ struct __booster_info{
     void *target;
     int index, error;
 };
+
+#include <stdlib.h>
+#include <string.h>
 
 /* boosters and lists inits */
 extern struct __list makeEmptyList();
