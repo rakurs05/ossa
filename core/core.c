@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <zip.h>
+#include <dlfcn.h>
 #ifdef __linux
     // #include <unistd.h>
     #include <sys/stat.h>
@@ -34,7 +35,7 @@ struct ossaChat makeChat(ossastr title, struct ossaPlugin *plugin){
     if(checkValidPlugin(plugin)){
         chat.plugin = plugin;
     }else{
-        return (struct ossaChat){0x0, lnothing, lnothing, 0x0};
+        return (struct ossaChat){0x0, lnothing, lnothing, lnothing, 0x0};
     }
     //Copy title
     chat.title = (malloc(strlen(title)));
@@ -168,4 +169,25 @@ int exportChat(struct ossaChat *_this, ossastr location){
         }
     }
     zip_close(drop);
+}
+
+int loadChatPlugin(struct ossaPlugin *_this, ossastr path){
+    void *entity = _this->libEntity = dlopen(path, RTLD_LAZY);
+    if(_this->libEntity == 0x0){
+        fprintf(stderr, "[!!] OSSA Core: Fatal error: failed to open \'%s\' plugin: %s", path, dlerror());
+        return -1;
+    }
+    _this->loaction = malloc(strlen(path));
+    strcpy(_this->loaction, path);
+    _this->init = dlsym(entity, "init");
+    _this->pcall.connect = (int(*)())dlsym(entity, "plugin_connect");
+    _this->pcall.disconnect = (int(*)())dlsym(entity, "plugin_disconnect");
+    _this->pcall.state = (int(*)())dlsym(entity, "plugin_state");
+    _this->pcall.info = (char*(*)())dlsym(entity, "plugin_info");
+
+    _this->pcall.auth = (int(*)(char*, char*))dlsym(entity, "plugin_auth");
+    _this->pcall.oauth = (int(*)(char*))dlsym(entity, "plugin_auth");
+    _this->pcall.exit = (int(*)())dlsym(entity, "plugin_exit");
+    _this->pcall.renameMe = (int(*)(char*))dlsym(entity, "plugin_renameMe");
+    // _this->pcall.myInfo = (int(*)())dlsym(entity, "");
 }

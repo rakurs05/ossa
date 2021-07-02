@@ -21,6 +21,7 @@
 
 #define ossaUID unsigned long
 #define ossaMID unsigned long
+#define ossaCID unsigned int
 #define ossastr char *
 
 #define CLIST_CONST_BUFFER_SIZE           1024
@@ -98,8 +99,8 @@ struct __PLUGIN_CALLS__{
     //Second-level
     // int (*inviteToChat)(struct Chat*, ossastr); // перемещено в chatAction
     // int (*deleteUser)(struct Chat*, ossaUID, ossastr); // перемещено в chatAction
-    int (*sendMes)(struct ossaChat*, ossaUID);
-    int (*editMes)(struct ossaChat*, ossaMID);
+    int (*sendMes)(ossaCID, ossaMessage);
+    int (*editMes)(ossaCID, ossaMessage, ossaMID);
     //Third-level
     int (*makeChat)(ossastr);
     ossastr (*getChatSettings)();

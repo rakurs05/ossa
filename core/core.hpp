@@ -43,7 +43,7 @@ class OssaChat{
 
         int drop(ossastr path);
 
-        OssaChat(Plugin *plugin);
+        OssaChat(OssaPlugin *plugin);
         ~OssaChat();
 };
 
