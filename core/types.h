@@ -98,17 +98,18 @@ struct __PLUGIN_CALLS__{
     ossaUser (*globalUIDInfo)(ossastr);
     //Second-level
     // int (*inviteToChat)(struct Chat*, ossastr); // перемещено в chatAction
-    // int (*deleteUser)(struct Chat*, ossaUID, ossastr); // перемещено в chatAction
+    // int (*deleteMes)(ossaCID, ossaMID); // перемещено в chatAction
     int (*sendMes)(ossaCID, ossaMessage);
     int (*editMes)(ossaCID, ossaMessage, ossaMID);
     //Third-level
-    int (*makeChat)(ossastr);
-    ossastr (*getChatSettings)();
-    int (*setChatSettings)(struct ossaChat*, ossastr, ossastr);
-    int (*updateChat)(struct ossaChat*);
-    int (*chatAction)(struct ossaChat*, ossastr); //(target chat, action) сделаю как просто вызов void-функции, если это равно 0x0
-    int (*loadChat)(struct ossaChat*, ossastr); //(target chat, src) if src in 0x0, read from Chat
-    int (*saveChat)(struct ossaChat*, ossastr); //Same as upper
+    int (*makeChat)(ossastr, ossaCID);
+    ossastr (*getChatSettings)(ossaCID);
+    int (*setChatSettings)(ossaCID, ossastr, ossastr);
+    int (*updateChat)(ossaCID);
+    int (*chatAction)(ossaCID, ossastr); //(target chat, action) сделаю как просто вызов void-функции, если это равно 0x0
+    int (*loadChat)(ossaCID, ossastr); //(target chat, src) if src in 0x0, read from Chat
+    int (*saveChat)(ossaCID, ossastr); //Same as upper
+    ossastr (*getChatList)();
 };
 
 ossaUID getUidFromUser(ossaUser user);

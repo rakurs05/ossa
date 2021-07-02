@@ -185,9 +185,21 @@ int loadChatPlugin(struct ossaPlugin *_this, ossastr path){
     _this->pcall.state = (int(*)())dlsym(entity, "plugin_state");
     _this->pcall.info = (char*(*)())dlsym(entity, "plugin_info");
 
-    _this->pcall.auth = (int(*)(char*, char*))dlsym(entity, "plugin_auth");
-    _this->pcall.oauth = (int(*)(char*))dlsym(entity, "plugin_auth");
-    _this->pcall.exit = (int(*)())dlsym(entity, "plugin_exit");
-    _this->pcall.renameMe = (int(*)(char*))dlsym(entity, "plugin_renameMe");
-    // _this->pcall.myInfo = (int(*)())dlsym(entity, "");
+    _this->pcall.auth = (int(*)(ossastr, char*))dlsym(entity, "plugin_user_auth");
+    _this->pcall.oauth = (int(*)(ossastr))dlsym(entity, "plugin_user_oauth");
+    _this->pcall.exit = (int(*)())dlsym(entity, "plugin_user_exit");
+    _this->pcall.renameMe = (int(*)(ossastr))dlsym(entity, "plugin_user_rename");
+    _this->pcall.myInfo = (ossaUser(*)())dlsym(entity, "plugin_user_info");
+    _this->pcall.globalUIDInfo = (ossaUser(*)(char*))dlsym(entity, "plugin_user_info");
+
+    _this->pcall.sendMes = (int(*)(ossaCID, ossaMessage))dlsym(entity, "plugin_message_send");
+    _this->pcall.editMes = (int(*)(ossaCID, ossaMessage, ossaMID))dlsym(entity, "plugin_message_edit");
+
+    _this->pcall.makeChat = (int(*)(ossastr, ossaCID))dlsym(entity, "plugin_chat_makeChat");
+    _this->pcall.getChatSettings = (ossastr(*)(ossaCID))dlsym(entity, "plugin_chat_getprefs");
+    _this->pcall.setChatSettings = (int(*)(ossaCID, ossastr, ossastr))dlsym(entity, "plugin_chat_setpref");
+    _this->pcall.updateChat = (int(*)(ossaCID))dlsym(entity,"plugin_chat_update");
+    _this->pcall.loadChat = (int(*)(ossaCID, ossastr))dlsym(entity,"plugin_chat_load");
+    _this->pcall.saveChat = (int(*)(ossaCID, ossastr))dlsym(entity,"plugin_chat_save");
+    _this->pcall.getChatList = (char*(*)())dlsym(entity,"plugin_chat_list");
 }
