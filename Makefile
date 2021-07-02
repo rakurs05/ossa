@@ -1,3 +1,7 @@
+GCCVERSION = $(shell gcc --version | grep ^gcc | sed 's/^.* //g')
+info:
+	$(info $(CC))
+	$(info "$(GCCVERSION)")
 gssa-main.cpp:
 	$(info [CC] Building ($@) ./gui/main.cpp ($@))
 	@$(CXX) ./gui/main.cpp $(CXXFLAGS) -o ./bin/gssa
@@ -18,7 +22,7 @@ corelib: deps-dlist core-core.c core-shared core-clean-shared
 core-dlist.c:
 	$(info [CC] Building ./core/dlist/list.c ($@))
 	@$(CC) ./core/dlist/list.c $(CFLAGS) -c -o ./lib/dlist.a
-core: corelib
+core: info corelib
 
 #Cleaning
 binclean:
