@@ -44,7 +44,9 @@ struct ossaChat makeChat(ossastr title, struct ossaPlugin *plugin){
     chat.userlist = makeEmptyList();
     chat.settings = makeEmptyList();
 
-    if(plugin->pcall.makeChat(title))
+    if(plugin->pcall.makeChat(title) < 0){
+        fprintf(stderr, "[!!] OSSA Core: Fatal error: failed to make new chat\n");
+    }
 
     return chat;
 }
@@ -95,6 +97,7 @@ int deleteUser(struct ossaChat* _this, ossaUID uid, ossastr additional){
 
 int sendMessage(struct ossaChat *_this, ossaMessage message){
     listAppend(&_this->messages, &message, sizeof(ossaMessage));
+    _this->plugin->pcall.sendMes(0, message);
     return updateChat(_this);
 }
 

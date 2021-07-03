@@ -11,6 +11,7 @@ int main(int argc, char **argv){
     plugin.pcall.auth("alexthunder", ".");
     chat = makeChat("chat.ffgelogger", &plugin);
     sendMessage(&chat, makeMessage(&chat, "Hello!", lnothing));
+    sendMessage(&chat, makeMessage(&chat, "Hello!", lnothing));
 
     while(1){
         

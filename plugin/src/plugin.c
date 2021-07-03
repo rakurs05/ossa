@@ -64,10 +64,12 @@ ossaUser plugin_user_ginfo(ossastr guid){
 }
 
 int plugin_message_send(ossaCID cid, ossaMessage mes){
+    if(stream == 0x0) return -1;
     fprintf(stream, "(SEND) %s@%lu (%lu): %s{%p}\n", iusername, cid, time(0x0), mes.body, &mes.attach);
     return OSSA_OK;
 }
 int plugin_message_editMes(ossaCID cid, ossaMessage mes, ossaMID mid){
+    if(stream == 0x0) return -1;
     fprintf(stream, "(EDITED %lu) %s@%lu (%lu): %s{%p}\n", mid, iusername, cid, time(0x0), mes.body, &mes.attach);
     return OSSA_OK;
 }
@@ -78,6 +80,7 @@ ossaCID plugin_chat_makeChat(ossastr title){
     stream = fopen(kkk, "w");
     free(kkk);
     if(stream == 0x0){
+        fprintf(stderr, "error on opening file\n");
         return -1*OSSA_DECLINE;
     }
     return 0;
@@ -89,7 +92,9 @@ int plugin_chat_setpref(ossaCID cid, ossastr fieldname, ossastr value){
     return OSSA_OK;
 }
 int plugin_chat_update(ossaCID cid){
+    if(stream == 0x0) return -1;
     fprintf(stream, "(UPDATE) request\n");
+    fflush(stream);
     return OSSA_OK;
 }
 int plugin_chat_loadChat(ossaCID cid, ossastr location){
