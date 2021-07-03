@@ -1,4 +1,4 @@
-.PHONY: corelib ore cssa cli plugin
+.PHONY: corelib ore cssa cli plugin all
 GCCVERSION = $(shell gcc --version | grep ^gcc | sed 's/^.* //g')
 BUILDMODE = "-DCOMPILE_STATIC"
 CFLAGS = "-g3"
@@ -21,7 +21,7 @@ core-core.c:
 	@$(CC) ./core/core.c $(CFLAGS) $(BUILDMODE) -c -fpic -lzip -ldl -o ./lib/core.o
 core-shared:
 	$(info [CC] Building (CORE) ./lib/core.o -> ./lib/libossa.so)
-	@$(CC) -shared -o ./lib/libossa.so ./lib/core.o
+	@$(CC) -shared -o ./lib/libossa.so ./lib/core.o ./lib/list.o
 core-clean-shared:
 	$(info [SH] Cleaning (LIB ) .o files)
 	@rm -f ./lib/*.o
@@ -46,6 +46,7 @@ plugin-clear:
 	$(info [SH] Cleaning (PLUG) ./plugin/plugin.o)
 	@rm -f ./plugin/plugin.o
 plugin: plugin-compile plugin-shared plugin-clear
+all: corelib cli gui
 
 #Cleaning
 binclean:
