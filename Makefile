@@ -21,7 +21,7 @@ core-core.c:
 	@$(CC) ./core/core.c $(CFLAGS) $(BUILDMODE) -c -fpic -lzip -ldl -o ./lib/core.o
 core-shared:
 	$(info [CC] Building (CORE) ./lib/core.o -> ./lib/libossa.so)
-	@$(CC) -shared -o ./lib/libossa.so ./lib/core.o ./lib/list.o
+	@$(CC) -shared -o ./lib/libossa.so ./lib/core.o ./lib/list.o -lzip -ldl
 core-clean-shared:
 	$(info [SH] Cleaning (LIB ) .o files)
 	@rm -f ./lib/*.o
