@@ -2,12 +2,13 @@
 GCCVERSION = $(shell gcc --version | grep ^gcc | sed 's/^.* //g')
 BUILDMODE = "-DCOMPILE_STATIC"
 CFLAGS = "-g3"
+CXX = $(CC) + " -std=gnu++17"
 utils-plugman:
 	$(info [GO] Building (UTILS) ./utilities/plugman.go -> ./bin/plugman)
 	@go build ./utilities/plugman.go
 	@mv ./plugman ./bin/plugman
 info:
-	$(info $(CC))
+	$(info $(CXX))
 	$(info "$(GCCVERSION)")
 gssa-main.cpp:
 	$(info [CC] Building (GUI ) ./gui/main.cpp)
@@ -46,7 +47,7 @@ plugin-clear:
 	$(info [SH] Cleaning (PLUG) ./plugin/plugin.o)
 	@rm -f ./plugin/plugin.o
 plugin: plugin-compile plugin-shared plugin-clear
-all: corelib cli gui
+all: corelib cli gui utils-plugman
 
 #Cleaning
 binclean:
