@@ -4,7 +4,7 @@
 #include <string.h>
 #include <zip.h>
 #include <dlfcn.h>
-#ifdef __linux
+#ifdef  __unix
     // #include <unistd.h>
     #include <sys/stat.h>
 #endif
