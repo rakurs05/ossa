@@ -4,7 +4,7 @@
 #include <string.h>
 #include <zip.h>
 #include <dlfcn.h>
-#ifdef  __unix
+#ifndef  __WIN32
     // #include <unistd.h>
     #include <sys/stat.h>
 #endif

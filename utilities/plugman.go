@@ -9,6 +9,7 @@ func main() {
 	fmt.Println("SUKA")
 	target := os.Args[1];
 	action := os.Args[2];
+	exampleManifestPath := 
 	var (
 		src string = "input"
 		dst string = "output"
@@ -30,7 +31,9 @@ func main() {
 		}
 	}
 	if (target == "manifest" || target == "mani") {
-		if action == "-init"	
+		if action == "-init" {
+
+		}
 	}
 
 }
