@@ -3,6 +3,8 @@
 #endif
 #include "./ossaconsts.h"
 
+int plugin_init();
+
 int plugin_connect();
 int plugin_disconnect();
 int plugin_state();
@@ -17,7 +19,7 @@ ossaUser plugin_user_ginfo(ossastr globalUID);
 int plugin_message_send(ossaCID cid, ossaMessage mes);
 int plugin_message_editMes(ossaCID cid, ossaMessage mes, ossaMID mid);
 
-int plugin_chat_makeChat(ossastr title, ossaCID cid);
+ossaCID plugin_chat_makeChat(ossastr title);
 ossastr plugin_chat_getprefs(ossaCID cid);
 int plugin_chat_setpref(ossaCID cid, ossastr fieldname, ossastr value);
 int plugin_chat_update(ossaCID cid);

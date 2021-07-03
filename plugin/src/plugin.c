@@ -8,6 +8,11 @@ char *   iusername      =0x0,
          nullchar       =0x0;
 FILE *   stream         =0x0;
 
+int plugin_init(){
+    printf("logger has been Inited.\n");
+    return OSSA_OK;
+}
+
 int plugin_connect(){
     printf("logger has been started.\n");
     return 0;
@@ -67,15 +72,15 @@ int plugin_message_editMes(ossaCID cid, ossaMessage mes, ossaMID mid){
     return OSSA_OK;
 }
 
-int plugin_chat_makeChat(ossastr title, ossaCID cid){
+ossaCID plugin_chat_makeChat(ossastr title){
     char *kkk = malloc(1024);
     sprintf(kkk, "%s/%s", ipathToFile, title);
     stream = fopen(kkk, "w");
     free(kkk);
     if(stream == 0x0){
-        return OSSA_DECLINE;
+        return -1*OSSA_DECLINE;
     }
-    return OSSA_OK;
+    return 0;
 }
 ossastr plugin_chat_getprefs(ossaCID cid){
     return &nullchar;
@@ -84,7 +89,7 @@ int plugin_chat_setpref(ossaCID cid, ossastr fieldname, ossastr value){
     return OSSA_OK;
 }
 int plugin_chat_update(ossaCID cid){
-    fprintf(stream, "(UPDATE) request (%lu)\n", cid);
+    fprintf(stream, "(UPDATE) request\n");
     return OSSA_OK;
 }
 int plugin_chat_loadChat(ossaCID cid, ossastr location){
@@ -104,8 +109,4 @@ ossastr plugin_chat_list(){
 }
 ossastr plugin_chat_getGUIDs(ossaCID cid){
     return &nullchar;
-}
-
-int main(){
-
 }

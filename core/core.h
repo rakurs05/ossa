@@ -6,19 +6,21 @@
 #ifndef OSSA_CPP
     #include "./dlist/list.h"
 #endif
-    struct ossaChat makeChat(ossastr title, struct ossaPlugin *plugin);
-    int setChatSettings(struct ossaChat* _this, ossastr field, ossastr data);
-    ossalist(ossastr) getChatSettings(struct ossaChat* _this);
-    int inviteToChat(struct ossaChat* _this, ossastr globalUID);
-    int deleteUser(struct ossaChat* _this, ossaUID uid, ossastr additional);
-    int sendMessage(struct ossaChat *_this, ossaMessage message);
-    ossaMessage makeMessage(struct ossaChat *_this, ossastr body, ossalist(ossastr) attachments);
-    int editMessage(struct ossaChat *_this, ossaMID mid, ossaMessage edited);
-    int chatAction(struct ossaChat *_this, ossastr action_name, ossalist(ossastr) args);
-    int updateChat(struct ossaChat *_this);
-    int exportChat(struct ossaChat *_this, ossastr location);
-    int importChat(struct ossaChat *_this, ossastr location);
+    extern struct ossaChat makeChat(ossastr title, struct ossaPlugin *plugin);
+    extern int setChatSettings(struct ossaChat* _this, ossastr field, ossastr data);
+    extern ossalist(ossastr) getChatSettings(struct ossaChat* _this);
+    extern int inviteToChat(struct ossaChat* _this, ossastr globalUID);
+    extern int deleteUser(struct ossaChat* _this, ossaUID uid, ossastr additional);
+    extern int sendMessage(struct ossaChat *_this, ossaMessage message);
+    extern ossaMessage makeMessage(struct ossaChat *_this, ossastr body, ossalist(ossastr) attachments);
+    extern int editMessage(struct ossaChat *_this, ossaMID mid, ossaMessage edited);
+    extern int chatAction(struct ossaChat *_this, ossastr action_name, ossalist(ossastr) args);
+    extern int updateChat(struct ossaChat *_this);
+    extern int exportChat(struct ossaChat *_this, ossastr location);
+    extern int importChat(struct ossaChat *_this, ossastr location);
+    extern int loadChatPlugin(struct ossaPlugin *_this, ossastr path);
+    extern int unloadChatPlugin(struct ossaPlugin *_this, ossastr path);
+    extern int authPlugin(struct ossaPlugin *_this, ossastr username, ossastr passwd);
+    extern int oauthPlugin(struct ossaPlugin *_this, ossastr token);
 
-    int loadChatPlugin(struct ossaPlugin *_this, ossastr path);
-    int unloadChatPlugin(struct ossaPlugin *_this, ossastr path);
 #endif  

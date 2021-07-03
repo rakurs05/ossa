@@ -45,7 +45,7 @@ struct __PLUGIN_CALLS__{
     int (*sendMes)(ossaCID, ossaMessage);
     int (*editMes)(ossaCID, ossaMessage, ossaMID);
     //Third-level
-    int (*makeChat)(ossastr, ossaCID);
+    ossaCID (*makeChat)(ossastr);
     ossastr (*getChatSettings)(ossaCID);
     int (*setChatSettings)(ossaCID, ossastr, ossastr);
     int (*updateChat)(ossaCID);

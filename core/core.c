@@ -43,6 +43,9 @@ struct ossaChat makeChat(ossastr title, struct ossaPlugin *plugin){
     chat.messages = makeEmptyList();
     chat.userlist = makeEmptyList();
     chat.settings = makeEmptyList();
+
+    if(plugin->pcall.makeChat(title))
+
     return chat;
 }
 
@@ -168,17 +171,19 @@ int exportChat(struct ossaChat *_this, ossastr location){
         }
     }
     zip_close(drop);
+    return 0;
 }
 
 int loadChatPlugin(struct ossaPlugin *_this, ossastr path){
     void *entity = _this->libEntity = dlopen(path, RTLD_LAZY);
     if(_this->libEntity == 0x0){
-        fprintf(stderr, "[!!] OSSA Core: Fatal error: failed to open \'%s\' plugin: %s", path, dlerror());
+        fprintf(stderr, "[!!] OSSA Core: Fatal error: failed to open \'%s\' plugin: \n\t%s\n", path, dlerror());
         return -1;
     }
+    unsigned int nullCounter = 0;
     _this->loaction = malloc(strlen(path));
     strcpy(_this->loaction, path);
-    _this->init = dlsym(entity, "init");
+    _this->init = dlsym(entity, "plugin_init");
     _this->pcall.connect = (int(*)())dlsym(entity, "plugin_connect");
     _this->pcall.disconnect = (int(*)())dlsym(entity, "plugin_disconnect");
     _this->pcall.state = (int(*)())dlsym(entity, "plugin_state");
@@ -193,7 +198,7 @@ int loadChatPlugin(struct ossaPlugin *_this, ossastr path){
     _this->pcall.sendMes = (int(*)(ossaCID, ossaMessage))dlsym(entity, "plugin_message_send");
     _this->pcall.editMes = (int(*)(ossaCID, ossaMessage, ossaMID))dlsym(entity, "plugin_message_edit");
 
-    _this->pcall.makeChat = (int(*)(ossastr, ossaCID))dlsym(entity, "plugin_chat_makeChat");
+    _this->pcall.makeChat = (ossaCID(*)(ossastr))dlsym(entity, "plugin_chat_makeChat");
     _this->pcall.getChatSettings = (ossastr(*)(ossaCID))dlsym(entity, "plugin_chat_getprefs");
     _this->pcall.setChatSettings = (int(*)(ossaCID, ossastr, ossastr))dlsym(entity, "plugin_chat_setpref");
     _this->pcall.updateChat = (int(*)(ossaCID))dlsym(entity,"plugin_chat_update");
@@ -201,8 +206,51 @@ int loadChatPlugin(struct ossaPlugin *_this, ossastr path){
     _this->pcall.getChatList = (ossastr(*)())dlsym(entity,"plugin_chat_list");
     _this->pcall.getChatGUIDs = (ossastr(*)(ossaCID))dlsym(entity, "plugin_chat_getGUIDs");
 
+    { /* check for NULL functions */
+        if(_this->init == 0x0) nullCounter++;
+
+        if(_this->pcall.connect == 0x0) nullCounter++;
+        if(_this->pcall.disconnect == 0x0) nullCounter++;
+        if(_this->pcall.state == 0x0) nullCounter++;
+        
+        if(_this->pcall.auth == 0x0) nullCounter++;
+        if(_this->pcall.oauth == 0x0) nullCounter++;
+        if(_this->pcall.exit == 0x0) nullCounter++;
+        if(_this->pcall.renameMe == 0x0) nullCounter++;
+        if(_this->pcall.myInfo == 0x0) nullCounter++;
+        if(_this->pcall.globalUIDInfo == 0x0) nullCounter++;
+
+        if(_this->pcall.sendMes == 0x0) nullCounter++;
+        if(_this->pcall.editMes == 0x0) nullCounter++;
+
+        if(_this->pcall.makeChat == 0x0) nullCounter++;
+        if(_this->pcall.getChatSettings == 0x0) nullCounter++;
+        if(_this->pcall.setChatSettings == 0x0) nullCounter++;
+        if(_this->pcall.updateChat == 0x0) nullCounter++;
+        if(_this->pcall.loadChat == 0x0) nullCounter++;
+        if(_this->pcall.getChatList == 0x0) nullCounter++;
+        if(_this->pcall.getChatGUIDs == 0x0) nullCounter++;
+    }
+
+    if(_this->init == 0x0){
+        fprintf(stderr, "[!!] OSSA Core: Fatal error: failed to load init\n");
+        return -2;
+    }else{
+        int code = _this->init();
+        if(code != OSSA_OK){
+                fprintf(stderr, "[!!] OSSA Core: Fatal error: init failed with code %i\n", code);
+                return -3;
+            }
+    }
+
+    return nullCounter;
 }
 
-int main(){
+#ifndef COMPILE_STATIC
+    // #warning "USING DYNAMIC COMPILATION"
+    int main(){
 
-}
+    }
+#else
+    // #warning "USING STATIC COMPILATION"
+#endif
