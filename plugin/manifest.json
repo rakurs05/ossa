@@ -1,0 +1,9 @@
+{
+    "name": "logger",
+    "main": "plugin.so",
+    "deps": [],
+    "resolve-net": ["127.0.0.1:4112", "127.0.0.1:8000"],
+    "resolve-loc": ["$all"],
+    "resolve-dsc": ["printf", "$fileworks"],
+    "arguments": "nodir"
+}

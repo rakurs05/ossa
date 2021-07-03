@@ -7,8 +7,14 @@
 #ifndef ossastr
     #define ossastr char *
 #endif
+#ifndef ossaMID
+    #define ossaMID unsigned long
+#endif
 #ifndef ossaUID
     #define ossaUID unsigned long
+#endif
+#ifndef ossaCID
+    #define ossaCID unsigned long
 #endif
 struct _Message{
     ossastr body;

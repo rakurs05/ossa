@@ -1,6 +1,7 @@
 #pragma once
 #ifndef OSSA_H
 #define OSSA_H
+#include "./ossaconsts.h"
 #include "./types.h"
 #ifndef OSSA_CPP
     #include "./dlist/list.h"

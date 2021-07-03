@@ -182,7 +182,6 @@ int loadChatPlugin(struct ossaPlugin *_this, ossastr path){
     _this->pcall.connect = (int(*)())dlsym(entity, "plugin_connect");
     _this->pcall.disconnect = (int(*)())dlsym(entity, "plugin_disconnect");
     _this->pcall.state = (int(*)())dlsym(entity, "plugin_state");
-    _this->pcall.info = (ossastr(*)())dlsym(entity, "plugin_info");
 
     _this->pcall.auth = (int(*)(ossastr, ossastr))dlsym(entity, "plugin_user_auth");
     _this->pcall.oauth = (int(*)(ossastr))dlsym(entity, "plugin_user_oauth");
@@ -199,8 +198,8 @@ int loadChatPlugin(struct ossaPlugin *_this, ossastr path){
     _this->pcall.setChatSettings = (int(*)(ossaCID, ossastr, ossastr))dlsym(entity, "plugin_chat_setpref");
     _this->pcall.updateChat = (int(*)(ossaCID))dlsym(entity,"plugin_chat_update");
     _this->pcall.loadChat = (int(*)(ossaCID, ossastr))dlsym(entity,"plugin_chat_load");
-    _this->pcall.saveChat = (int(*)(ossaCID, ossastr))dlsym(entity,"plugin_chat_save");
-    _this->pcall.getChatList = (char*(*)())dlsym(entity,"plugin_chat_list");
+    _this->pcall.getChatList = (ossastr(*)())dlsym(entity,"plugin_chat_list");
+    _this->pcall.getChatGUIDs = (ossastr(*)(ossaCID))dlsym(entity, "plugin_chat_getGUIDs");
 
 }
 
