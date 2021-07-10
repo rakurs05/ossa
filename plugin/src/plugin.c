@@ -9,13 +9,17 @@ char *   iusername      =0x0,
          nullchar       =0x0;
 FILE *   stream         =0x0;
 
+// extern void *cinfo(const char *e);
+void* (*cinfo)(const char *e);
+
 int plugin_init(){
     printf("OSSA User Kit Version: 0.3-A.\n");
+    cinfo("OSSA User Kit Host");
     return OSSA_OK;
 }
 
 int plugin_connect(){
-    // printf("OSSA User Kit Host \n");
+    cinfo("OSSA User Kit Host");
     return 0;
 }
 int plugin_disconnect(){

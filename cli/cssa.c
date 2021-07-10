@@ -17,6 +17,11 @@ struct _settings{
             *config;
 };
 
+// void *cinfo(const char *e){
+//     printf("Core info request: %s\n", e);
+//     return 0x0;
+// }
+
 struct _usercom{
     ossastr name;
     int (*entity)(ossalist(ossastr));
@@ -30,8 +35,6 @@ ossalist(_usercom) comslist = lnothing;
 
 struct ossaChat *currentChat = 0x0;
 
-ossalist(struct ossaChat) chats = lnothing;
-ossalist(struct ossaPlugin) plugins = lnothing;
 int input(ossalist(ossastr) *buffer){
     char *ibuf = news(char, 1024);
     memset(ibuf, 0, 1024);
@@ -88,6 +91,8 @@ int main(int argc, char **argv){
         }
     }
 
+    ossalist(struct ossaChat) chats = makeEmptyList();
+    ossalist(struct ossaPlugin) plugins = makeEmptyList();
     ossalist(struct _usercom) usercoms = makeEmptyList();
 
     { /* loading user-space commands */
@@ -95,6 +100,7 @@ int main(int argc, char **argv){
         if(listGet(&plugins, 0) == 0x0){
             //Failed to load sysplugin
             printf("[!!] OSSA Client: Failed to load system plugin at %s\n", settings.defaultUsercomsLocaton);
+            return -1;
         }
 
         struct ossaChat syschat = makeChat("sys", (struct ossaPlugin*)listGet(&plugins, 0));

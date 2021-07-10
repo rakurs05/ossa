@@ -179,6 +179,11 @@ int exportChat(struct ossaChat *_this, ossastr location){
     return 0;
 }
 
+void *cinfo(const char *e){
+    printf("CINFO: %s\n", e);
+    return 0x0;
+}
+
 int loadChatPlugin(struct ossaPlugin *_this, ossastr path){
     void *entity = _this->libEntity = dlopen(path, RTLD_LAZY);
     if(_this->libEntity == 0x0){
@@ -211,6 +216,7 @@ int loadChatPlugin(struct ossaPlugin *_this, ossastr path){
     _this->pcall.getChatList = (ossastr(*)())dlsym(entity,"plugin_chat_list");
     _this->pcall.getChatGUIDs = (ossastr(*)(ossaCID))dlsym(entity, "plugin_chat_getGUIDs");
     _this->pcall.chatAction = (int(*)(ossaCID, ossastr))dlsym(entity, "plugin_chat_action");
+    *((void*(**)(const char *))(dlsym(entity, "cinfo"))) = cinfo;
 
     { /* check for NULL functions */
         if(_this->init == 0x0) nullCounter++;
