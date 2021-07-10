@@ -1,5 +1,37 @@
-#include "./cssa.mutual.c"
+#include <stdio.h>
+#include <stdlib.h>
+#include "../core/core.h"
+#define OSSA_MUTUAL_CLI
 
+#define OSSA_CLI_NOPLUGINS  1<<7
+#define OSSA_CLI_USEBOIP    1<<6
+#define OSSA_CLI_DEVMODE    1<<5
+#define OSSA_CLI_ALLOWSHELL 1<<4
+#define OSSA_CLI_SYSERNAME  1<<3
+#define OSSA_CLI_USE_ETC    1<<2
+#define OSSA_CLI_ALLOWSO    1<<1
+#define OSSA_CLI_ANTIALIAS  1<<0
+
+struct _settings{
+    char    *defaultUsercomsLocaton,
+            *config;
+};
+
+struct _usercom{
+    ossastr name;
+    int (*entity)(ossalist(ossastr));
+};
+
+char flags = OSSA_CLI_ALLOWSHELL | OSSA_CLI_ALLOWSO | OSSA_CLI_ANTIALIAS | OSSA_CLI_USE_ETC;
+
+char *uname, *chatname;
+
+ossalist(_usercom) comslist = lnothing;
+
+struct ossaChat *currentChat = 0x0;
+
+ossalist(struct ossaChat) chats = lnothing;
+ossalist(struct ossaPlugin) plugins = lnothing;
 int input(ossalist(ossastr) *buffer){
     char *ibuf = news(char, 1024);
     memset(ibuf, 0, 1024);
@@ -63,8 +95,8 @@ int main(int argc, char **argv){
         if(listGet(&plugins, 0) == 0x0){
             //Failed to load sysplugin
             printf("[!!] OSSA Client: Failed to load system plugin at %s\n", settings.defaultUsercomsLocaton);
-            astype(struct _usercom) listResolve(&usercoms, sizeof(struct _usercom)) = (struct _usercom){"lschat",lschat};
         }
+
         struct ossaChat syschat = makeChat("sys", (struct ossaPlugin*)listGet(&plugins, 0));
         if(syschat.plugin == 0x0){
             //Failed to start syschat
@@ -92,30 +124,26 @@ int main(int argc, char **argv){
         ibuffer = makeEmptyList();
         input(&ibuffer);
         if(astype(char)listGet(&ibuffer, 0) == ':'){
-            int ff = 0;
-            for(unsigned int i = 0; i < listLen(&comslist); i++){
-                // Сo to kurwa jest?! Bardzo straszne
-                if(!strcmp((char*)(listGet(&ibuffer, 0)+1), ((struct _usercom*)(listGet(&usercoms, i)))->name)){
-                    ff = 1;
-                    if(((struct _usercom*)(listGet(&usercoms, i)))->entity(listFrame(&ibuffer, 1) != 0x0 ? *listFrame(&ibuffer, 1) : lnothing) != OSSA_OK){
-                        //Error
-                        printf("Error occuped while \"%s\" executing\n", (char*)(listGet(&ibuffer, 0)+1));
+            switch(chatAction((struct ossaChat*)listGet(&chats, 0), (char*)(listGet(&ibuffer, 0)+1), listFrame(&ibuffer, 1) != 0x0 ? *listFrame(&ibuffer, 1) : lnothing)){
+                case OSSA_OK:
+                    break;
+                case OSSA_COM_NOT_FOUND:
+                    switch(chatAction(currentChat, (char*)(listGet(&ibuffer, 0)+1), listFrame(&ibuffer, 1) != 0x0 ? *listFrame(&ibuffer, 1) : lnothing)){
+                        case OSSA_OK:
+                            break;
+                        case OSSA_COM_NOT_FOUND:
+                            printf("Command \"%s\" not found.\n", (char*)(listGet(&ibuffer, 0)+1));
+                            break;
+                        case OSSA_COM_INVALID_ARGS:
+                            printf("Command \"%s\" called with invalid arguments.\n", (char*)(listGet(&ibuffer, 0)+1));
+                            break;
                     }
-                }
-            }
-            if(!ff){
-                switch(chatAction(currentChat, (char*)(listGet(&ibuffer, 0)+1), listFrame(&ibuffer, 1) != 0x0 ? *listFrame(&ibuffer, 1) : lnothing)){
-                    case OSSA_OK:
-                        break;
-                    case OSSA_COM_NOT_FOUND:
-                        printf("Command \"%s\" bot found.\n", (char*)(listGet(&ibuffer, 0)+1));
-                        break;
-                    case OSSA_COM_INVALID_ARGS:
-                        printf("Command \"%s\" called with invalid arguments.\n", (char*)(listGet(&ibuffer, 0)+1));
-                        break;
-                    // if()
-                    // printf("Command \"%s\" bot found.\n", (char*)(listGet(&ibuffer, 0)+1));
-                }
+                    break;
+                case OSSA_COM_INVALID_ARGS:
+                    printf("Command \"%s\" called with invalid arguments.\n", (char*)(listGet(&ibuffer, 0)+1));
+                    break;
+                // if()
+                // printf("Command \"%s\" bot found.\n", (char*)(listGet(&ibuffer, 0)+1));
             }
         }else if(astype(char)listGet(&ibuffer, 0) == '$'){
             if(flags & OSSA_CLI_ALLOWSHELL){
