@@ -43,8 +43,9 @@ struct ossaChat makeChat(ossastr title, struct ossaPlugin *plugin){
     chat.messages = makeEmptyList();
     chat.userlist = makeEmptyList();
     chat.settings = makeEmptyList();
+    chat.cid = plugin->pcall.makeChat(title);
 
-    if(plugin->pcall.makeChat(title) < 0){
+    if(chat.cid < 0){
         fprintf(stderr, "[!!] OSSA Core: Fatal error: failed to make new chat\n");
     }
 
@@ -58,6 +59,7 @@ int setChatSettings(struct ossaChat* _this, ossastr field, ossastr data){
     char *buffer = malloc(size);
     sprintf(buffer, "%s\r%s", field, data);
     listAppendLink(&_this->settings, buffer);
+    return OSSA_OK;
 }
 
 ossalist(ossastr) getChatSettings(struct ossaChat* _this){
@@ -97,7 +99,7 @@ int deleteUser(struct ossaChat* _this, ossaUID uid, ossastr additional){
 
 int sendMessage(struct ossaChat *_this, ossaMessage message){
     listAppend(&_this->messages, &message, sizeof(ossaMessage));
-    _this->plugin->pcall.sendMes(0, message);
+    _this->plugin->pcall.sendMes(_this->cid, message);
     return updateChat(_this);
 }
 
@@ -117,18 +119,18 @@ int editMessage(struct ossaChat *_this, ossaMID mid, ossaMessage edited){
 int chatAction(struct ossaChat *_this, ossastr action_name, ossalist(ossastr) args){
     char argv[5120];
     memset(argv, 0, 5120);
-        strcat(argv, "\2");
+    strcat(argv, "\x02");
     strcpy(argv, action_name);
-    for(int i = 0; i < listLen(&args); i++){
+    for(int i = 1; i < listLen(&args); i++){
         strcat(argv, (char*)listGet(&args, i));
-        strcat(argv, "\28");
+        strcat(argv, "\x1c");
     }
-        strcat(argv, "\3");
-    return _this->plugin->pcall.chatAction(0, argv);
+    strcat(argv, "\x03");
+    return _this->plugin->pcall.chatAction(_this->cid, argv);
 }
 
 int updateChat(struct ossaChat *_this){
-    return _this->plugin->pcall.updateChat(0);
+    return _this->plugin->pcall.updateChat(_this->cid);
 }
 
 int exportChat(struct ossaChat *_this, ossastr location){
@@ -208,6 +210,7 @@ int loadChatPlugin(struct ossaPlugin *_this, ossastr path){
     _this->pcall.loadChat = (int(*)(ossaCID, ossastr))dlsym(entity,"plugin_chat_load");
     _this->pcall.getChatList = (ossastr(*)())dlsym(entity,"plugin_chat_list");
     _this->pcall.getChatGUIDs = (ossastr(*)(ossaCID))dlsym(entity, "plugin_chat_getGUIDs");
+    _this->pcall.chatAction = (int(*)(ossaCID, ossastr))dlsym(entity, "plugin_chat_action");
 
     { /* check for NULL functions */
         if(_this->init == 0x0) nullCounter++;

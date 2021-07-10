@@ -42,11 +42,11 @@ plugin-compile:
 	@$(CC) ./plugin/src/plugin.c -fpic -c -o ./plugin/plugin.o
 plugin-shared:
 	$(info [CC] Building (PLUG) ./plugin/src/plugin.o -> ./plugin/plugin.so)
-	@$(CC) ./plugin/plugin.o -shared -o ./plugin/plugin.so
+	@$(CC) ./plugin/plugin.o ./lib/list.o -shared -o ./plugin/plugin.so
 plugin-clear:
 	$(info [SH] Cleaning (PLUG) ./plugin/plugin.o)
 	@rm -f ./plugin/plugin.o
-plugin: plugin-compile plugin-shared plugin-clear
+plugin: deps-dlist plugin-compile plugin-shared plugin-clear
 all: corelib cli gui utils-plugman
 
 #Cleaning

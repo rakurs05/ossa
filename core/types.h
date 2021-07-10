@@ -68,6 +68,7 @@ struct ossaChat{
     ossalist(ossaMessage) messages;
     ossalist(ossaUser) userlist;
     ossalist(ossastr) settings;
+    ossaCID cid;
     struct ossaPlugin *plugin;
 };
 

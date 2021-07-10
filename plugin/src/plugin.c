@@ -2,6 +2,7 @@
 #include <string.h>
 #include <time.h>
 #include "./musthave.h"
+#include "mhs.h"
 
 char *   iusername      =0x0,
      *   ipathToFile    =0x0,
@@ -9,16 +10,16 @@ char *   iusername      =0x0,
 FILE *   stream         =0x0;
 
 int plugin_init(){
-    printf("logger has been Inited.\n");
+    printf("OSSA User Kit Version: 0.3-A.\n");
     return OSSA_OK;
 }
 
 int plugin_connect(){
-    printf("logger has been started.\n");
+    // printf("OSSA User Kit Host \n");
     return 0;
 }
 int plugin_disconnect(){
-    printf("logger has been stopped.\n");
+    // printf("logger has been stopped.\n");
     return 0;
 }
 int plugin_state(){
@@ -76,13 +77,18 @@ int plugin_message_editMes(ossaCID cid, ossaMessage mes, ossaMID mid){
 
 ossaCID plugin_chat_makeChat(ossastr title){
     char *kkk = malloc(1024);
-    sprintf(kkk, "%s/%s", ipathToFile, title);
+    if(ipathToFile == 0x0){
+        sprintf(kkk, "%s.ossalog", title);
+    } else {
+        sprintf(kkk, "%s/%s.ossalog", ipathToFile, title);
+    }
     stream = fopen(kkk, "w");
-    free(kkk);
     if(stream == 0x0){
-        fprintf(stderr, "error on opening file\n");
+        fprintf(stderr, "error on opening file \"%s\"\n", kkk);
+        free(kkk);
         return -1*OSSA_DECLINE;
     }
+    free(kkk);
     return 0;
 }
 ossastr plugin_chat_getprefs(ossaCID cid){
@@ -114,4 +120,42 @@ ossastr plugin_chat_list(){
 }
 ossastr plugin_chat_getGUIDs(ossaCID cid){
     return &nullchar;
+}
+
+//Read command word
+int oreadWord(ossastr ptr, ossastr from){
+    for(unsigned int i = 0; ; i++){
+        if(from[i] == '\x02' || from[i] == '\x1c' || from[i] == '\x03' || from[i] == 0){
+            ptr[i] = 0;
+            return from[i];
+        }else{
+            ptr[i] = from[i];
+        }
+    }
+    return 0;
+}
+
+int plugin_chat_action(ossaCID chatid, ossastr action){
+    char word[512];
+    int index = 0;
+    oreadWord(word, action);
+    if(!strcmp(word, "info")){
+        fprintf(stderr, "OSSA User Kit Version: 0.3-A.\n\tOperating system is ");
+        #ifdef __linux
+            fprintf(stderr, "linux");
+        #endif
+        #ifdef __WIN32
+            fprintf(stderr, "Windows");
+        #endif
+        #ifdef __APPLE
+            fprintf(stderr, "macOS (OSX)");
+        #endif
+        fprintf(stderr, "\n\tTotal commands (except MCCK): %i\n\tLog file: (%p)\n", 0, stream);
+    }else if(!strcmp(word, "ffmeg")){
+
+    }else{
+        fprintf(stderr, "\"%s\" is not found", word);
+        return -1;
+    }
+    return OSSA_OK;
 }

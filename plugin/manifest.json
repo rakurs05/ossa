@@ -1,9 +1,9 @@
 {
-    "name": "logger",
+    "name": "OSSA user command kit",
     "main": "plugin.so",
     "deps": [],
-    "resolve-net": ["127.0.0.1:4112", "127.0.0.1:8000"],
+    "resolve-net": [],
     "resolve-loc": ["$all"],
-    "resolve-dsc": ["printf", "$fileworks"],
-    "arguments": "nodir"
+    "resolve-dsc": ["$all"],
+    "arguments": "nodir no-plugent"
 }

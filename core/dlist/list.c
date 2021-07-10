@@ -165,6 +165,8 @@ int earaseList(struct __list *_this){
     while (listLen(_this) > 1) {
         listRemove(_this, 0);
     }
+    free(_this->next);
+    *_this = (struct __list) {0x0, 0x0};
     return 0;
 }
 int listRemove(struct __list *_this, int index){

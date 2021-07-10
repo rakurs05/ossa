@@ -18,4 +18,8 @@
 #define OSSA_UPDATE_NEW_MESSAGE     1<<2
 #define OSSA_UPDATE_UNRESOLVED_EDIT 1<<3
 #define OSSA_UPDATE_EDITED_MESSAGE  1<<4
+
+#define OSSA_COM_NOT_FOUND      -1
+#define OSSA_COM_INVALID_ARGS   -2
+
 #endif
