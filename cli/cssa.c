@@ -1,3 +1,4 @@
+#include <dlfcn.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include "../core/core.h"
@@ -17,10 +18,10 @@ struct _settings{
             *config;
 };
 
-// void *cinfo(const char *e){
-//     printf("Core info request: %s\n", e);
-//     return 0x0;
-// }
+void *cinfo(const char *e){
+    printf("Core info request: %s\n", e);
+    return 0x0;
+}
 
 struct _usercom{
     ossastr name;
@@ -30,8 +31,6 @@ struct _usercom{
 char flags = OSSA_CLI_ALLOWSHELL | OSSA_CLI_ALLOWSO | OSSA_CLI_ANTIALIAS | OSSA_CLI_USE_ETC;
 
 char *uname, *chatname;
-
-ossalist(_usercom) comslist = lnothing;
 
 struct ossaChat *currentChat = 0x0;
 
@@ -93,7 +92,6 @@ int main(int argc, char **argv){
 
     ossalist(struct ossaChat) chats = makeEmptyList();
     ossalist(struct ossaPlugin) plugins = makeEmptyList();
-    ossalist(struct _usercom) usercoms = makeEmptyList();
 
     { /* loading user-space commands */
         loadChatPlugin((struct ossaPlugin *)listResolve(&plugins, sizeof(struct ossaPlugin)), settings.defaultUsercomsLocaton);
@@ -102,6 +100,8 @@ int main(int argc, char **argv){
             printf("[!!] OSSA Client: Failed to load system plugin at %s\n", settings.defaultUsercomsLocaton);
             return -1;
         }
+        *((ossalist(struct ossaChat)**)(dlsym(((struct ossaPlugin*)listGet(&plugins, 0))->libEntity, "chats"))) = &chats;
+        *((ossalist(struct ossaPlugin)**)(dlsym(((struct ossaPlugin*)listGet(&plugins, 0))->libEntity, "plugins"))) = &chats;
 
         struct ossaChat syschat = makeChat("sys", (struct ossaPlugin*)listGet(&plugins, 0));
         if(syschat.plugin == 0x0){
@@ -114,7 +114,6 @@ int main(int argc, char **argv){
             }else{
                 earaseList(&chats);
                 earaseList(&plugins);
-                earaseList(&usercoms);
                 return -1;
             }
         }
@@ -130,26 +129,17 @@ int main(int argc, char **argv){
         ibuffer = makeEmptyList();
         input(&ibuffer);
         if(astype(char)listGet(&ibuffer, 0) == ':'){
-            switch(chatAction((struct ossaChat*)listGet(&chats, 0), (char*)(listGet(&ibuffer, 0)+1), listFrame(&ibuffer, 1) != 0x0 ? *listFrame(&ibuffer, 1) : lnothing)){
+            switch (chatAction(listGet(&chats, 0),\
+                (char*)(listGet(&ibuffer, 0)+1),\
+                listFrame(&ibuffer, 1) != 0x0 ? *listFrame(&ibuffer, 1) : lnothing)){
+                case OSSA_ORDER_KILL_CLIENT:
+                    earaseList(&chats);
+                    earaseList(&plugins);
+                    return OSSA_OK;
                 case OSSA_OK:
                     break;
-                case OSSA_COM_NOT_FOUND:
-                    switch(chatAction(currentChat, (char*)(listGet(&ibuffer, 0)+1), listFrame(&ibuffer, 1) != 0x0 ? *listFrame(&ibuffer, 1) : lnothing)){
-                        case OSSA_OK:
-                            break;
-                        case OSSA_COM_NOT_FOUND:
-                            printf("Command \"%s\" not found.\n", (char*)(listGet(&ibuffer, 0)+1));
-                            break;
-                        case OSSA_COM_INVALID_ARGS:
-                            printf("Command \"%s\" called with invalid arguments.\n", (char*)(listGet(&ibuffer, 0)+1));
-                            break;
-                    }
+                default:
                     break;
-                case OSSA_COM_INVALID_ARGS:
-                    printf("Command \"%s\" called with invalid arguments.\n", (char*)(listGet(&ibuffer, 0)+1));
-                    break;
-                // if()
-                // printf("Command \"%s\" bot found.\n", (char*)(listGet(&ibuffer, 0)+1));
             }
         }else if(astype(char)listGet(&ibuffer, 0) == '$'){
             if(flags & OSSA_CLI_ALLOWSHELL){

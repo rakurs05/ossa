@@ -1,8 +1,8 @@
 #include <stdio.h>
 #include <string.h>
 #include <time.h>
+#include "../../core/types.h"
 #include "./musthave.h"
-#include "mhs.h"
 
 char *   iusername      =0x0,
      *   ipathToFile    =0x0,
@@ -12,14 +12,16 @@ FILE *   stream         =0x0;
 // extern void *cinfo(const char *e);
 void* (*cinfo)(const char *e);
 
+ossalist(struct ossaChat) *chats = 0x0;
+ossalist(struct ossaPlugin) *plugins = 0x0;
+
 int plugin_init(){
     printf("OSSA User Kit Version: 0.3-A.\n");
-    cinfo("OSSA User Kit Host");
     return OSSA_OK;
 }
 
 int plugin_connect(){
-    cinfo("OSSA User Kit Host");
+    // cinfo("OSSA User Kit Host");
     return 0;
 }
 int plugin_disconnect(){
@@ -70,12 +72,12 @@ ossaUser plugin_user_ginfo(ossastr guid){
 
 int plugin_message_send(ossaCID cid, ossaMessage mes){
     if(stream == 0x0) return -1;
-    fprintf(stream, "(SEND) %s@%lu (%lu): %s{%p}\n", iusername, cid, time(0x0), mes.body, &mes.attach);
+    fprintf(stream, "(SEND) %s@%i (%lu): %s{%p}\n", iusername, cid, time(0x0), mes.body, &mes.attach);
     return OSSA_OK;
 }
 int plugin_message_editMes(ossaCID cid, ossaMessage mes, ossaMID mid){
     if(stream == 0x0) return -1;
-    fprintf(stream, "(EDITED %lu) %s@%lu (%lu): %s{%p}\n", mid, iusername, cid, time(0x0), mes.body, &mes.attach);
+    fprintf(stream, "(EDITED %lu) %s@%i (%lu): %s{%p}\n", mid, iusername, cid, time(0x0), mes.body, &mes.attach);
     return OSSA_OK;
 }
 
@@ -140,26 +142,85 @@ int oreadWord(ossastr ptr, ossastr from){
 }
 
 int plugin_chat_action(ossaCID chatid, ossastr action){
-    char word[512];
-    int index = 0;
-    oreadWord(word, action);
-    if(!strcmp(word, "info")){
-        fprintf(stderr, "OSSA User Kit Version: 0.3-A.\n\tOperating system is ");
-        #ifdef __linux
-            fprintf(stderr, "linux");
-        #endif
-        #ifdef __WIN32
-            fprintf(stderr, "Windows");
-        #endif
-        #ifdef __APPLE
-            fprintf(stderr, "macOS (OSX)");
-        #endif
-        fprintf(stderr, "\n\tTotal commands (except MCCK): %i\n\tLog file: (%p)\n", 0, stream);
-    }else if(!strcmp(word, "ffmeg")){
+    char **prases, *original;
+    int argc;
 
-    }else{
-        fprintf(stderr, "\"%s\" is not found", word);
-        return -1;
+    original = malloc(strlen(action));
+    strcpy(original, action);
+
+    { /* parsing */
+        int ff = 0;
+        for(int i = 0; i < strlen(action); i++){
+            if(original[i] == '\x1c') ff++;
+        }
+        prases = news(char*, ff+1);
+        argc = ff;
+        prases[0] = original;
+        ff = 0;
+        for(int i = 0; i < strlen(action); i++){
+            if(original[i] == '\x1c') {original[i] = 0;prases[++ff]=original+(i+1);}
+        }
     }
+
+    if(!strcmp(prases[0], "exit")){
+        return 0x6;
+    }else if(!strcmp(prases[0], "lschat")){
+        char flags = 0;
+        struct ossaPlugin *opt = 0x0;
+        for(int i = 1; i < argc; i++){
+            if(!strcmp(prases[i], "-cid")){
+                flags |= 1 << 0;
+            } else if(!strcmp(prases[i], "-mem")){
+                flags |= 1 << 1;
+            } else if(!strcmp(prases[i], "-plugin")){
+                flags |= 1 << 2;
+            } else if(!strcmp(prases[i], "-po")){
+                flags |= 1 << 3;
+                i++;
+                for(int j = 0; j < listLen(plugins); j++){
+                    if(!strcmp(((struct ossaPlugin*)listGet(plugins, j))->name, prases[i]))
+                        {opt = listGet(plugins, j); break;}
+                }
+            } else if(!strcmp(prases[i], "-state")){
+                flags |= 1 << 4;
+            }
+        }
+        if(flags & (1<<0)){
+            printf("CID\t");
+        }
+        if(flags & (1<<1)){
+            printf("memory\t");
+        }
+        printf("Name\t");
+        if(flags & (1<<2)){
+            printf("parent\t");
+        }
+        if(flags & (1<<4)){
+            printf("state\t");
+        }
+        printf("\n");
+        for(ossaCID i = 0; i < listLen(chats); i++){
+            if(flags & (1<<3)){
+                if(((struct ossaChat*)listGet(chats, i))->plugin != opt)
+                    continue;
+            }
+            if(flags & (1<<0)){
+                printf("%i\t", i);
+            }
+            if(flags & (1<<1)){
+                printf("%p\t", listGet(chats, i));
+            }
+            printf("%s\t", ((struct ossaChat*)listGet(chats, i))->title);
+            if(flags & (1<<2)){
+                printf("%s\t", ((struct ossaChat*)listGet(chats, i))->plugin->name);
+            }
+            if(flags & (1<<4)){
+                printf("%i\t", ((struct ossaChat*)listGet(chats, i))->plugin->pcall.state());
+            }
+            printf("\n");
+        }
+        printf("Total: %i\n", listLen(chats));
+    }
+    
     return OSSA_OK;
 }

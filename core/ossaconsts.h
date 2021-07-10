@@ -22,4 +22,6 @@
 #define OSSA_COM_NOT_FOUND      -1
 #define OSSA_COM_INVALID_ARGS   -2
 
+#define OSSA_ORDER_KILL_CLIENT  0x6
+
 #endif

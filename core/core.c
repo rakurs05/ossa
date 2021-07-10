@@ -119,13 +119,13 @@ int editMessage(struct ossaChat *_this, ossaMID mid, ossaMessage edited){
 int chatAction(struct ossaChat *_this, ossastr action_name, ossalist(ossastr) args){
     char argv[5120];
     memset(argv, 0, 5120);
-    strcat(argv, "\x02");
+    strcat(argv, "\x1c");
     strcpy(argv, action_name);
     for(int i = 1; i < listLen(&args); i++){
         strcat(argv, (char*)listGet(&args, i));
         strcat(argv, "\x1c");
     }
-    strcat(argv, "\x03");
+    strcat(argv, "\0");
     return _this->plugin->pcall.chatAction(_this->cid, argv);
 }
 
@@ -179,11 +179,6 @@ int exportChat(struct ossaChat *_this, ossastr location){
     return 0;
 }
 
-void *cinfo(const char *e){
-    printf("CINFO: %s\n", e);
-    return 0x0;
-}
-
 int loadChatPlugin(struct ossaPlugin *_this, ossastr path){
     void *entity = _this->libEntity = dlopen(path, RTLD_LAZY);
     if(_this->libEntity == 0x0){
@@ -216,7 +211,6 @@ int loadChatPlugin(struct ossaPlugin *_this, ossastr path){
     _this->pcall.getChatList = (ossastr(*)())dlsym(entity,"plugin_chat_list");
     _this->pcall.getChatGUIDs = (ossastr(*)(ossaCID))dlsym(entity, "plugin_chat_getGUIDs");
     _this->pcall.chatAction = (int(*)(ossaCID, ossastr))dlsym(entity, "plugin_chat_action");
-    *((void*(**)(const char *))(dlsym(entity, "cinfo"))) = cinfo;
 
     { /* check for NULL functions */
         if(_this->init == 0x0) nullCounter++;
