@@ -119,13 +119,11 @@ int editMessage(struct ossaChat *_this, ossaMID mid, ossaMessage edited){
 int chatAction(struct ossaChat *_this, ossastr action_name, ossalist(ossastr) args){
     char argv[5120];
     memset(argv, 0, 5120);
-    strcat(argv, "\x1c");
     strcpy(argv, action_name);
-    for(int i = 1; i < listLen(&args); i++){
-        strcat(argv, (char*)listGet(&args, i));
-        strcat(argv, "\x1c");
+    for(int i = 0; i < listLen(&args); i++){
+        sprintf(argv, "%s %s", argv, (char*)listGet(&args, i));
+        // strcat(argv, );
     }
-    strcat(argv, "\0");
     return _this->plugin->pcall.chatAction(_this->cid, argv);
 }
 
@@ -260,3 +258,7 @@ int loadChatPlugin(struct ossaPlugin *_this, ossastr path){
 #else
     // #warning "USING STATIC COMPILATION"
 #endif
+
+ossastr getUsernameFromUser(ossaUser user){
+    return user.nickname;
+}
