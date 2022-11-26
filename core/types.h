@@ -2,13 +2,17 @@
 
 #define ossaUID unsigned long
 #define ossaMID unsigned long
-#define ossaCID unsigned int
+#define ossaCID void *
 #define ossastr char *
 
 #ifdef OSSA_CTU
 #define Message void *
 #define User void *
 #define Role void *
+
+#ifndef pthread_t
+    typedef unsigned long int pthread_t;
+#endif
 
 #else
 #include "./mhs.h"
@@ -55,14 +59,6 @@ struct __PLUGIN_CALLS__{
     ossastr (*getChatGUIDs)(ossaCID);
 };
 
-ossaUID getUidFromUser(ossaUser user);
-ossastr getUsernameFromUser(ossaUser user);
-
-ossastr getMessageBody(ossaMessage mes);
-ossaUID getMessageSender(ossaMessage mes);
-ossastr getMessageHead(ossaMessage mes);
-ossaMessage makeMes(ossastr body, ossaUID sender, long long time);
-
 struct ossaChat{
     ossastr title;
     ossalist(ossaMessage) messages;
@@ -72,9 +68,16 @@ struct ossaChat{
     struct ossaPlugin *plugin;
 };
 
+struct SymbolList{
+    char *type;
+    void *data;
+    struct SymbolList* next;
+};
+
 struct ossaPlugin{
     //Shared data
     void *libEntity;
+    struct SymbolList sl;
     struct __PLUGIN_CALLS__ pcall;
     //Structure calls
     int (*init)();
@@ -85,9 +88,8 @@ struct ossaPlugin{
     //Resolves
     ossalist(ossastr) resolved_net; //resolved network connections
     ossalist(ossastr) resolved_loc; //resolved local files access
-    // //Constants as NULL
-    // ossaUser noUser;
-    // ossaMessage noMessage; //deleted message, for example
+    //Staff
+    ossalist(pthread_t) threads;
 };
 
 #define lnothing (struct __list){0x0, 0x0}

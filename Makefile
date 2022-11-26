@@ -19,10 +19,10 @@ deps-dlist:
 	@$(CC) -c ./core/dlist/list.c $(CFLAGS) -fpic -o ./lib/list.o
 core-core.c:
 	$(info [CC] Building (CORE) ./core/core.c -> ./lib/core.o)
-	@$(CC) ./core/core.c $(CFLAGS) $(BUILDMODE) -c -fpic -lzip -ldl -o ./lib/core.o
+	$(CC) ./core/core.c $(CFLAGS) $(BUILDMODE) -c -fpic -lzip -ldl -o ./lib/core.o -lpthread
 core-shared:
 	$(info [CC] Building (CORE) ./lib/core.o -> ./lib/libossa.so)
-	@$(CC) -shared -o ./lib/libossa.so ./lib/core.o ./lib/list.o -lzip -ldl
+	$(CC) -shared -o ./lib/libossa.so ./lib/core.o ./lib/list.o -lzip -ldl -lpthread
 core-clean-shared:
 	$(info [SH] Cleaning (LIB ) .o files)
 	@rm -f ./lib/*.o
@@ -33,16 +33,16 @@ core-dlist.c:
 core: corelib core-clean-shared
 cssa.c:
 	$(info [CC] Building (CLI ) ./cli/cssa.c -> ./bin/cssa)
-	@$(CC) ./cli/cssa.c $(CFLAGS) ./lib/core.o ./lib/list.o -o ./bin/cssa -lzip -ldl
+	@$(CC) ./cli/cssa.c $(CFLAGS) ./lib/core.o ./lib/list.o -o ./bin/cssa -lzip -ldl -lpthread
 cssa: $(BUILDMODE = -DCOMPILE_DYNAMIC) corelib cssa.c
 cli: cssa
 gui: core gssa-main.cpp
 plugin-compile:
 	$(info [CC] Building (PLUG) ./plugin/src/plugin.c -> ./plugin/plugin.o)
-	@$(CC) ./plugin/src/plugin.c -fpic -c -o ./plugin/plugin.o
+	@$(CC) ./plugin/src/plugin.c -fpic -c -o ./plugin/plugin.o -g3
 plugin-shared:
 	$(info [CC] Building (PLUG) ./plugin/src/plugin.o -> ./plugin/plugin.so)
-	@$(CC) ./plugin/plugin.o ./lib/list.o -shared -o ./plugin/plugin.so
+	@$(CC) ./plugin/plugin.o ./lib/list.o -shared -o ./plugin/plugin.so -g3
 plugin-clear:
 	$(info [SH] Cleaning (PLUG) ./plugin/plugin.o)
 	@rm -f ./plugin/plugin.o

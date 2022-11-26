@@ -1,0 +1,12 @@
+{
+    "files.associations": {
+        "xiosbase": "cpp",
+        "mhs.h": "c",
+        "list.h": "c",
+        "plugin.h": "c",
+        "core.h": "c",
+        "errno.h": "c",
+        "ossaconsts.h": "c",
+        "windows.h": "c"
+    }
+}

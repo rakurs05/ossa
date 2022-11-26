@@ -22,5 +22,10 @@
     extern int unloadChatPlugin(struct ossaPlugin *_this, ossastr path);
     extern int authPlugin(struct ossaPlugin *_this, ossastr username, ossastr passwd);
     extern int oauthPlugin(struct ossaPlugin *_this, ossastr token);
+    extern int setLogFunction(void (*ossaLog)(char type, const char *format, ...));
+    extern int setLoginFunction(void (*ossaLogin)(char **username, char **password, char *plugin_name));
+    extern int setPreferAuthType(int authType);
+    extern int setNotifyCallback(void (*callback)(struct ossaChat *where, ossaMessage incoming));
+    extern int setNewMessageHandler(int (*newMessageHandler)(ossaCID cid, ossaMessage mes));
 
 #endif  

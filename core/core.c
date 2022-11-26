@@ -4,18 +4,29 @@
 #include <string.h>
 #include <zip.h>
 #include <dlfcn.h>
+#include <pthread.h>
+#include <stdarg.h>
 #ifndef  __WIN32
     // #include <unistd.h>
     #include <sys/stat.h>
 #endif
 
-#define OSSA_CORE_VERSION "0.3-AS(D)"
+#define OSSA_CORE_VERSION "0.6-AS(D)"
 
 #ifndef OSSA_CORE_MAXHEADER
     #define OSSA_CORE_MAXHEADER 1024
 #endif
 
-/* internel */
+/* local */
+int (*newMessageHandler)(ossaCID cid, ossaMessage mes);
+int pluginChatAddMessage(ossaCID cid, ossaMessage mes){
+    listAppend(&((struct ossaChat*)(cid))->messages, &mes, sizeof(ossaMessage));
+    if(newMessageHandler != 0x0) newMessageHandler(cid, mes);
+    return 0;
+}int pluginChatAddUser(ossaCID cid, ossaUser mes){
+    listAppend(&((struct ossaChat*)(cid))->userlist, &mes, sizeof(ossaUser));
+    return 0;
+}
 char checkValidPlugin(struct ossaPlugin *plugin){
     return 1;
 }
@@ -25,8 +36,30 @@ char find_settings(const void *target, void *current){
 char find_user(const void *target, void *current){
 
 }
-
+void defaultLogFunction(char type, const char *format, ...){
+    va_list list;
+    va_start(list, format);
+    vprintf(format, list);
+    va_end(list);
+}
+int notifyProcess(void *pluginptr, ossaCID cid, ossaMessage message){
+    struct ossaPlugin *pl = (struct ossaPlugin *)pluginptr;
+    
+}
+// Local variables
+void (*logFunction)(char type, const char *format, ...) = defaultLogFunction;
+void (*notifyCallback)(struct ossaChat *where, ossaMessage incoming) = 0x0;
 /* export */
+int setNewMessageHandler(int (*clientNewMessageHandler)(ossaCID cid, ossaMessage mes)){
+    newMessageHandler = clientNewMessageHandler;
+}
+int setNotifyCallback(void (*callback)(struct ossaChat *where, ossaMessage incoming)){
+    notifyCallback = callback;
+}
+int setLogFunction(void (*ossaLog)(char type, const char *format, ...)){
+    logFunction = ossaLog;
+    return !(logFunction == 0x0);
+}
 struct ossaChat makeChat(ossastr title, struct ossaPlugin *plugin){
     //Make chat object
     struct ossaChat chat;
@@ -42,6 +75,8 @@ struct ossaChat makeChat(ossastr title, struct ossaPlugin *plugin){
     //Making empty lists
     chat.messages = makeEmptyList();
     chat.userlist = makeEmptyList();
+    ossaUser zero = {"me", "{\"metadata\":{\"visual\":{\"pictype\":\"none\",\"picture\":\"none\"},\"text\":{\"name\":\"Default OSSA user (me)\",\"bio\":\"\"}},\"chat\":{\"name\":\"me\",\"ossauid\":0,\"roles\":[]}\"GID\":\"OUKVp0.4-C\"}"};
+    listAppend(&chat.userlist, &zero, sizeof(ossaUser));
     chat.settings = makeEmptyList();
     chat.cid = plugin->pcall.makeChat(title);
 
@@ -97,8 +132,17 @@ int deleteUser(struct ossaChat* _this, ossaUID uid, ossastr additional){
     return code;
 }
 
+int ossSetPluginRoutineDirect(void *pluginptr,void*(*routine)(void *args), void* args){
+    pthread_t pid;
+    pthread_create(&pid, 0x0, routine, args);
+    pthread_detach(pid);
+    listAppend(&((struct ossaPlugin*)(pluginptr))->threads, &pid, sizeof(pthread_t));
+}
+
 int sendMessage(struct ossaChat *_this, ossaMessage message){
     listAppend(&_this->messages, &message, sizeof(ossaMessage));
+    if(!(_this->plugin->pcall.state() & (OSSA_STATE_AUTHED|OSSA_STATE_ENABLE)))
+        return OSSA_BAD_LOGIN;
     _this->plugin->pcall.sendMes(_this->cid, message);
     return updateChat(_this);
 }
@@ -117,17 +161,22 @@ int editMessage(struct ossaChat *_this, ossaMID mid, ossaMessage edited){
 }
 
 int chatAction(struct ossaChat *_this, ossastr action_name, ossalist(ossastr) args){
-    char argv[5120];
+    char *argv = malloc(5120);
     memset(argv, 0, 5120);
     strcpy(argv, action_name);
     for(int i = 0; i < listLen(&args); i++){
         sprintf(argv, "%s %s", argv, (char*)listGet(&args, i));
         // strcat(argv, );
     }
-    return _this->plugin->pcall.chatAction(_this->cid, argv);
+    int ret = _this->plugin->pcall.chatAction(_this->cid, argv);
+    free(argv);
+    return ret;
 }
 
 int updateChat(struct ossaChat *_this){
+    if( _this->plugin->pcall.updateChat(_this->cid) > 0){
+        
+    }
     return _this->plugin->pcall.updateChat(_this->cid);
 }
 
@@ -178,6 +227,9 @@ int exportChat(struct ossaChat *_this, ossastr location){
 }
 
 int loadChatPlugin(struct ossaPlugin *_this, ossastr path){
+    if(path == 0x0){
+        return -1;
+    }
     void *entity = _this->libEntity = dlopen(path, RTLD_LAZY);
     if(_this->libEntity == 0x0){
         fprintf(stderr, "[!!] OSSA Core: Fatal error: failed to open \'%s\' plugin: \n\t%s\n", path, dlerror());
@@ -186,6 +238,29 @@ int loadChatPlugin(struct ossaPlugin *_this, ossastr path){
     unsigned int nullCounter = 0;
     _this->loaction = malloc(strlen(path));
     strcpy(_this->loaction, path);
+    _this->name = *((char**)(dlsym(entity, "plugin_name")));
+    if(_this->name == 0x0){
+        return -2;
+    }
+    for(int i = 0; _this->name[i] != 0; i++){
+        if(((_this->name[i] > 'z' || _this->name[i] < 'a')&&
+            (_this->name[i] > 'Z' || _this->name[i] < 'A')&&
+            (_this->name[i] > '9' || _this->name[i] < '0'))&&
+            (_this->name[i] != '_' && _this->name[i] != '-')){
+                fprintf(stderr, "Unregular name: \'%s\', \'%c\'\n", _this->name, _this->name[i]);
+                return -2;
+            }
+    }
+    if(dlsym(entity, "self") == 0x0){
+        return -3;
+    }
+    *((void**)(dlsym(entity, "self"))) = (void*)_this;
+    if(_this->name == 0x0) {
+        fprintf(stderr, "[!!] OSSA Core: Fatal error: failed to load \'%s\' plugin: unnamed plugin.\n", path);
+    }
+    if(dlsym(entity, "ossaLog") != 0x0){
+        *((void(**)(char, const char*, ...))dlsym(entity, "ossaLog")) = logFunction;
+    }
     _this->init = dlsym(entity, "plugin_init");
     _this->pcall.connect = (int(*)())dlsym(entity, "plugin_connect");
     _this->pcall.disconnect = (int(*)())dlsym(entity, "plugin_disconnect");
@@ -235,6 +310,23 @@ int loadChatPlugin(struct ossaPlugin *_this, ossastr path){
         if(_this->pcall.getChatList == 0x0) nullCounter++;
         if(_this->pcall.getChatGUIDs == 0x0) nullCounter++;
     }
+    { //exporting
+        void *ptr = 0x0;
+        //ossaClientSetRoutineDirect
+        ptr = dlsym(entity, "ossaClientSetRoutineDirect");
+        if(ptr != 0x0){
+            *((int(**)(void*,void*(*)(void*), void*))(ptr)) = ossSetPluginRoutineDirect;
+        }
+        ptr = 0x0;
+        ptr = dlsym(entity, "ossaChatAddMessage");
+        if(ptr != 0x0){
+            *((int(**)(ossaCID cid, ossaMessage))(ptr)) = pluginChatAddMessage;
+        }
+        ptr = dlsym(entity, "ossaChatAddUser");
+        if(ptr != 0x0){
+            *((int(**)(ossaCID cid, ossaUser))(ptr)) = pluginChatAddUser;
+        }
+    }
 
     if(_this->init == 0x0){
         fprintf(stderr, "[!!] OSSA Core: Fatal error: failed to load init\n");
@@ -242,9 +334,9 @@ int loadChatPlugin(struct ossaPlugin *_this, ossastr path){
     }else{
         int code = _this->init();
         if(code != OSSA_OK){
-                fprintf(stderr, "[!!] OSSA Core: Fatal error: init failed with code %i\n", code);
-                return -3;
-            }
+            fprintf(stderr, "[!!] OSSA Core: Fatal error: init failed with code %i\n", code);
+            return -3;
+        }
     }
 
     return nullCounter;

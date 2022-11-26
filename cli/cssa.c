@@ -1,11 +1,21 @@
 #include <dlfcn.h>
+#include <errno.h>
 #include <stdio.h>
 #define MAX_USERID_LENGTH 32
 #include <stdlib.h>
 #include "../core/core.h"
-// #ifndef __WIN32
-//     #include <unistd.h>
-// #endif
+#ifndef __WIN32
+    #include <unistd.h>
+    void playsound(const char *path){
+
+    }
+#else
+    #include <windows.h>
+    void playsound(const char *path){
+        PlaySound(path, NULL, SND_ASYNC);
+        printf("\033[s\n* NEW MESSAGE *\033[u");
+    }
+#endif
 #define OSSA_MUTUAL_CLI
 
 #define OSSA_CLI_ALLOW_KFP  1<<8
@@ -18,10 +28,16 @@
 #define OSSA_CLI_ALLOWSO    1<<1
 #define OSSA_CLI_ANTIALIAS  1<<0
 
+int messageHandler(ossaCID cid, ossaMessage mes){
+    playsound("message.mp3");
+    printf("\033[s\n* NEW MESSAGE *\033[u");
+}
+
 struct _settings{
     char    *defaultUsercomsLocaton,
-            *config;
-    unsigned int flags;           
+            *config,
+            *plugins;
+    unsigned int flags;
 };
 
 void *cinfo(const char *e){
@@ -44,7 +60,7 @@ int input(ossalist(ossastr) *buffer){
     char *ibuf = news(char, 1024);
     memset(ibuf, 0, 1024);
     int i = 0;
-    printf("%s@%s> ", /*getUsernameFromUser(astype(ossaUser)listGet(&currentChat->userlist, 0))*/ uname, currentChat->title);
+    printf("\033[s\n\033[u%s@%s> ", ((ossaUser*)listGet(&currentChat->userlist, 0))->nickname, currentChat->title);
     while(1){
         char c = getchar();
         if(c == ' '){
@@ -56,56 +72,134 @@ int input(ossalist(ossastr) *buffer){
             ibuf[i] = 0;
             listAppend(buffer, ibuf, strlen(ibuf)+1);
             break;
+        }else if(c == 8){
+            if(i == 0){
+                strcpy(ibuf, (char*)listGet(buffer, listLen(buffer)));
+                listRemove(buffer, listLen(buffer));
+            }else{
+                ibuf[--i] = 0;
+            }
         }else{
             ibuf[i++] = c;
         }
     }
     free(ibuf);
     return OSSA_OK;
-}   
+}
+
+int parseSettings(int argc, char **argv, struct _settings *settings){
+    for(int i = 0; i < argc; i++){
+        if(!strcmp(argv[i], "--noplug") || !strcmp(argv[i], "-P")){
+
+        } else if(!strcmp(argv[i], "--useBOIP") || !strcmp(argv[i], "-b")){
+
+        } else if(!strcmp(argv[i], "--devmode") || !strcmp(argv[i], "-D")){
+            settings->flags |= OSSA_CLI_DEVMODE;
+        } else if(!strcmp(argv[i], "--fullacc") || !strcmp(argv[i], "-F")){
+
+        } else if(!strcmp(argv[i], "--sysname") || !strcmp(argv[i], "-S")){
+            uname = malloc(MAX_USERID_LENGTH);
+            // cuserid(uname);
+        } else if(!strcmp(argv[i], "--no-use-etc") || !strcmp(argv[i], "-e")){
+
+        } else if(!strcmp(argv[i], "--allowonlyso") || !strcmp(argv[i], "-s")){
+
+        } else if(!strcmp(argv[i], "--antialias") || !strcmp(argv[i], "-a")){
+
+        } else if(!strcmp(argv[i], "--conf") || !strcmp(argv[i], "-E" )){
+            if(strcmp(settings->config, argv[i+1])){
+                settings->config = argv[++i];
+
+                FILE *cfg = fopen(settings->config, "r");
+                char *argss = (char*)malloc(2048);
+                fread(argss, 1, 2048, cfg);
+                char **args_structed = (char**)(malloc(sizeof(char*) * 32));
+                args_structed[0] = argss;
+                int current_Arg = 0;
+                for(int i = 0; argss[i] != 0; i++){
+                    if(argss[i] == ' '){
+                        argss[i] = 0;
+                        args_structed[++current_Arg] = argss+(++i);
+                    }
+                }
+                fclose(cfg);
+
+                parseSettings(current_Arg, args_structed, settings);
+            }
+        } else if(!strcmp(argv[i], "--usercoms") || !strcmp(argv[i], "-U" )){
+            settings->defaultUsercomsLocaton = argv[++i];
+        } else if(!strcmp(argv[i], "--allow-kfp") || !strcmp(argv[i], "-K" )) {
+            settings->flags |= OSSA_CLI_ALLOW_KFP;
+        } else if(!strcmp(argv[i], "--plugpath") || !strcmp(argv[i], "-p")){
+            settings->plugins = argv[++i];
+        }
+        else {
+            printf("Usage here\n");
+        }
+    }
+}
 
 int main(int argc, char **argv){
 
     struct _settings settings = {0x0,0x0,0x0};
 
-    { /* args parsing */
-        for(int i = 1; i < argc; i++){
-            if(!strcmp(argv[i], "--noplug") || !strcmp(argv[i], "-P")){
+    { //Default settings
+        #ifndef __WIN32
 
-            } else if(!strcmp(argv[i], "--useBOIP") || !strcmp(argv[i], "-b")){
-
-            } else if(!strcmp(argv[i], "--devmode") || !strcmp(argv[i], "-D")){
-
-            } else if(!strcmp(argv[i], "--fullacc") || !strcmp(argv[i], "-F")){
-
-            } else if(!strcmp(argv[i], "--sysname") || !strcmp(argv[i], "-S")){
-                uname = malloc(MAX_USERID_LENGTH);
-                cuserid(uname);
-            } else if(!strcmp(argv[i], "--no-use-etc") || !strcmp(argv[i], "-e")){
-
-            } else if(!strcmp(argv[i], "--allowonlyso") || !strcmp(argv[i], "-s")){
-
-            } else if(!strcmp(argv[i], "--antialias") || !strcmp(argv[i], "-a")){
-
-            } else if(!strcmp(argv[i], "--conf") || !strcmp(argv[i], "-E" )){
-                settings.config = argv[++i];
-            } else if(!strcmp(argv[i], "--usercoms") || !strcmp(argv[i], "-U" )){
-                settings.defaultUsercomsLocaton = argv[++i];
-            } else if(!strcmp(argv[i], "--allow-kfp") || !strcmp(argv[i], "-K" )) {
-                settings.flags |= OSSA_CLI_ALLOW_KFP;
+            char *f = "/.config/ossa/cssa.cfg";
+            char *ff = (char*)malloc(strlen(getenv("HOME")) + strlen(f) + 1);
+            strcat(ff, getenv("HOME"));
+            strcat(ff, f);
+            FILE *cfg = fopen(ff, "r");
+            if(cfg == 0x0){
+                cfg = fopen("/etc/ossa/cssa.cfg", "r");
+                if(cfg == 0x0){
+                    cfg = fopen(ff, "w");
+                    if(cfg == 0x0) {
+                        printf("[!!] OSSA Client: Unable to read or rewrite config. Please, reinstall CSSA or allow \'+w+r\' for \"~/.config/ossa/cssa.cfg\"\n");
+                        printf("[!!] OSSA Client: I/O Error: %s\n", strerror(errno));
+                        return -1;
+                    }
+                    cuserid(uname);
+                    fprintf(cfg, "--sysname --allowonlyso --usercoms %s/.config/ossa/interpreter.so --plugpath %s/.share/ossa/plugins/", getenv("HOME"), getenv("HOME"));
+                    fflush(cfg);
+                    fclose(cfg);
+                    cfg = fopen(ff, "r");
+                    if(cfg == 0x0) {
+                        printf("[!!] OSSA Client: Unable to read or rewrite config. Please, reinstall CSSA or allow \'+w+r\' for \"~/.config/ossa/cssa.cfg\"\n");
+                        return -1;
+                    }
+                }
             }
-            else {
-                printf("Usage here");
+            char *argss = (char*)malloc(2048);
+            fread(argss, 1, 2048, cfg);
+            char **args_structed = (char**)(malloc(sizeof(char*) * 32));
+            args_structed[0] = argss;
+            int current_Arg = 0;
+            for(int i = 0; argss[i] != 0; i++){
+                if(argss[i] == ' '){
+                    argss[i] = 0;
+                    args_structed[++current_Arg] = argss+(++i);
+                }
             }
-        }
+            parseSettings(current_Arg+1, args_structed, &settings);
+            // free(args_structed);
+            // free(argss);
+            fclose(cfg);
+        #else
+
+        #endif
     }
+    parseSettings(argc, argv, &settings);
+
+    setNewMessageHandler(messageHandler);
 
     ossalist(struct ossaChat) chats = makeEmptyList();
     ossalist(struct ossaPlugin) plugins = makeEmptyList();
 
     { /* loading user-space commands */
-        loadChatPlugin((struct ossaPlugin *)listResolve(&plugins, sizeof(struct ossaPlugin)), settings.defaultUsercomsLocaton);
-        if(listGet(&plugins, 0) == 0x0){
+        if(loadChatPlugin((struct ossaPlugin *)listResolve(&plugins, sizeof(struct ossaPlugin)), settings.defaultUsercomsLocaton) == -1 ||
+            listGet(&plugins, 0) == 0x0){
             //Failed to load sysplugin
             printf("[!!] OSSA Client: Failed to load system plugin at %s\n", settings.defaultUsercomsLocaton);
             return -1;
@@ -136,11 +230,11 @@ int main(int argc, char **argv){
             }
         }
         listAppend(&chats, &syschat, sizeof(struct ossaChat));
-        currentChat = listGet(&chats, 0);
         // listAppend(&currentChat->userlist, (uname, strlen(uname));
         /* later */
     }
     currentChat = listGet(&chats, 0);
+    *(struct ossaChat***)(dlsym(((struct ossaPlugin*)listGet(&plugins, 0))->libEntity, "currentChat")) = &currentChat;
 
     ossalist(ossastr) ibuffer = makeEmptyList();
 
@@ -203,6 +297,19 @@ int main(int argc, char **argv){
             }
         }else{
             //Send message
+            ossaMessage mes;
+            mes.attach = makeEmptyList();
+            mes.uid = 0;
+            mes.body = (char*)malloc(1024*4);
+            memset(mes.body, 0, 1024*4);
+            for(int i = 0; i < listLen(&ibuffer); i++){
+                sprintf(mes.body, "%s %s", mes.body, (char*)listGet(&ibuffer, i));
+            }
+            int sendcode = sendMessage(currentChat, mes) < 0;
+            if(sendcode != OSSA_OK){
+                printf("<<ERROR>>\n");
+            }
+            // free(mes.body);
         }
     }
 }

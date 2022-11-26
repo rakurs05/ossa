@@ -34,6 +34,10 @@ struct __booster_info{
 };
 
 /* boosters and lists inits */
+extern char comparePointers(const void *a, void *b);
+extern char compareInts(const void *a, void *b);
+extern char compareFloats(const void *a, void *b);
+#define compareStrings(a, b) strcmp(a,b)
 extern struct __list makeEmptyList();
 extern struct __list makeListFromArr(void *array, unsigned int _element_size, unsigned int _elements_count);
 extern struct __list_booster makeBooster(struct __list *list, unsigned int pointRate);

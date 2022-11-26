@@ -7,6 +7,16 @@ struct __list makeEmptyList(){
     return me;
 }
 
+char comparePointers(const void *a, void *b){
+    return (a == b);
+}
+char compareInts(const void *a, void *b){
+    return (*((int*)a) == *((int*)b));
+}
+char compareFloats(const void *a, void *b){
+    return (*((int*)a) == *((int*)b));
+}
+
 void *listResolve(struct __list *_this, unsigned int size){
     if(_this == 0x0)
         return CLIST_ERROR_NULL_ARG;
