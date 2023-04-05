@@ -6,10 +6,7 @@
 #include <dlfcn.h>
 #include <pthread.h>
 #include <stdarg.h>
-#ifndef  __WIN32
-    // #include <unistd.h>
-    #include <sys/stat.h>
-#endif
+#include <sys/stat.h>
 
 #define OSSA_CORE_VERSION "0.6-AS(D)"
 

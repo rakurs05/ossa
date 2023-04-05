@@ -19,7 +19,7 @@ deps-dlist:
 	@$(CC) -c ./core/dlist/list.c $(CFLAGS) -fpic -o ./lib/list.o
 core-core.c:
 	$(info [CC] Building (CORE) ./core/core.c -> ./lib/core.o)
-	$(CC) ./core/core.c $(CFLAGS) $(BUILDMODE) -c -fpic -lzip -ldl -o ./lib/core.o -lpthread
+	$(CC) ./core/core.c $(CFLAGS) $(BUILDMODE) -c -fpic -lzip -ldl -o ./lib/core.o -lpthread -lwindows
 core-shared:
 	$(info [CC] Building (CORE) ./lib/core.o -> ./lib/libossa.so)
 	$(CC) -shared -o ./lib/libossa.so ./lib/core.o ./lib/list.o -lzip -ldl -lpthread
@@ -42,7 +42,7 @@ plugin-compile:
 	@$(CC) ./plugin/src/plugin.c -fpic -c -o ./plugin/plugin.o -g3
 plugin-shared:
 	$(info [CC] Building (PLUG) ./plugin/src/plugin.o -> ./plugin/plugin.so)
-	@$(CC) ./plugin/plugin.o ./lib/list.o -shared -o ./plugin/plugin.so -g3
+	@$(CC) ./plugin/plugin.o ./lib/list.o -shared -o ./plugin/plugin.so -g3 -ldl -lzip
 plugin-clear:
 	$(info [SH] Cleaning (PLUG) ./plugin/plugin.o)
 	@rm -f ./plugin/plugin.o

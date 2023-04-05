@@ -1,0 +1,28 @@
+Public Module Program
+	Public Sub Main(args() As string)
+		' Console.WriteLine("Hello, World!")
+		Dim n as Integer = Convert.toInt32(Console.ReadLine())
+		Dim smallest as Double = 999999.9
+		Dim biggest as Double = 0.0
+		Dim w(n) as Double
+		For i as Integer = 0 To n
+		  Dim current As Double
+		  If Not Double.TryParse(Console.ReadLine(), current) Then
+		    ' Console.WriteLine("failed to Convert")
+	    Else
+  		  ' Console.WriteLine(current)
+  		  w(i) = current
+  		  If current <= smallest Then
+  		    smallest = current
+  		  ElseIf current >= biggest Then
+  		    biggest = current
+  		  End If
+		  End If
+		Next
+		Dim u(2) as Double
+		u(0) = biggest - smallest
+		u(1) = biggest + smallest
+		Console.WriteLine(u(0))
+		Console.WriteLine(u(1))
+	End Sub
+End Module

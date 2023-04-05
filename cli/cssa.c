@@ -12,7 +12,7 @@
 #else
     #include <windows.h>
     void playsound(const char *path){
-        PlaySound(path, NULL, SND_ASYNC);
+        // PlaySound(path, NULL, SND_ASYNC);
         printf("\033[s\n* NEW MESSAGE *\033[u");
     }
 #endif

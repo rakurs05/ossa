@@ -248,8 +248,8 @@ int plugin_chat_action(ossaCID chatid, ossastr action){
     //     printf("argv[%i] is \"%s\"\n", i, argv[i]);
     // }
     if(!strcmp(argv[0], "exit")){
-        free(argv);
-        free(original);
+        // free(argv);
+        // free(original);
         return 0x6;
     }else if(!strncmp(argv[0], "ls", 2)){
 
@@ -359,8 +359,8 @@ int plugin_chat_action(ossaCID chatid, ossastr action){
     } else if(!strcmp(argv[0], "plugin")){
         if(!strcmp(argv[1], "load")){
             if(loadChatPlugin((struct ossaPlugin *)listResolve(plugins, sizeof(struct ossaPlugin)), argv[2]) < 0){
-                free(argv);
-                free(original);
+                // free(argv);
+                // free(original);
                 return -3;
             }else{
                 printf("< Plugin \"%s\" loaded successfully. Adress: %p\n", argv[2], listGet(plugins, listLen(plugins)-1));
@@ -481,8 +481,8 @@ int plugin_chat_action(ossaCID chatid, ossastr action){
             }
         }
         else{
-            free(argv);
-            free(original);
+            // free(argv);
+            // free(original);
             return -2;
         }
     } else if(!strcmp(argv[0], "help")){
@@ -514,8 +514,8 @@ int plugin_chat_action(ossaCID chatid, ossastr action){
         }
         if(plug == 0x0){
             printf("< Failed to create new chat: \"%s\" plugin is not found.\n", argv[1]+term+1);
-            free(argv);
-            free(original);
+            // free(argv);
+            // free(original);
             return OSSA_COM_INVALID_ARGS;
         }
         struct ossaChat newchat = makeChat(argv[1], plug);
@@ -523,8 +523,8 @@ int plugin_chat_action(ossaCID chatid, ossastr action){
     }else if(!strcmp(argv[0], "set")){
         if(!strcmp(argv[1], "chat")){
             if(atoi(argv[2]) >= listLen(chats)){
-                free(argv);
-                free(original);
+                // free(argv);
+                // free(original);
                 return OSSA_COM_INVALID_ARGS;
             } else *currentChat = listGet(chats, atoi(argv[2]));
         }else{
@@ -553,18 +553,18 @@ int plugin_chat_action(ossaCID chatid, ossastr action){
             ossaChatAddMessage(*currentChat, (ossaMessage){"Example message for test", lnothing, 0});
             unread++;
         }else{
-            free(argv);
-            free(original);
+            // free(argv);
+            // free(original);
             return OSSA_COM_NOT_FOUND;
         }
     }
     else {
-        free(argv);
-        free(original);
+        // free(argv);
+        // free(original);
         return OSSA_COM_NOT_FOUND;
     }
-    free(argv);
-    free(original);
+    // free(argv);
+    // free(original);
     return OSSA_OK;
 }
 ossastr plugin_chat_list(){
