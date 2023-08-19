@@ -19,6 +19,7 @@
     extern int exportChat(struct ossaChat *_this, ossastr location);
     extern int importChat(struct ossaChat *_this, ossastr location);
     extern int loadChatPlugin(struct ossaPlugin *_this, ossastr path);
+    extern int loadPlugin(struct ossaPlugin *_this, ossastr path);
     extern int unloadChatPlugin(struct ossaPlugin *_this, ossastr path);
     extern int authPlugin(struct ossaPlugin *_this, ossastr username, ossastr passwd);
     extern int oauthPlugin(struct ossaPlugin *_this, ossastr token);
@@ -27,5 +28,9 @@
     extern int setPreferAuthType(int authType);
     extern int setNotifyCallback(void (*callback)(struct ossaChat *where, ossaMessage incoming));
     extern int setNewMessageHandler(int (*newMessageHandler)(ossaCID cid, ossaMessage mes));
+    extern int pushToHeap(char *symname, void *data);
+    extern int removeFromHeap(char *symname);
+    extern struct ossaSymbol getFromHeap(char *symname);
+    extern int initHeap(struct ossaSymbol *heapStorage);
 
 #endif  

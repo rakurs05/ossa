@@ -1,9 +1,11 @@
 {
-    "name": "OSSA user command kit",
+    "name": "ossa_plugman",
+    "title": "OSSA Plugin manager",
     "main": "plugin.so",
     "deps": [],
-    "resolve-net": [],
+    "resolve-net": ["$all"],
     "resolve-loc": ["$all"],
     "resolve-dsc": ["$all"],
-    "arguments": "nodir no-plugent"
+    "arguments": "nodir system",
+    "include": "usercoms.json"
 }

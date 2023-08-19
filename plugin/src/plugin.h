@@ -3,6 +3,15 @@
 #endif
 #include "./ossaconsts.h"
 
+#define ossa_init_args(ptr, ...) \
+    struct { \
+        void *env; \
+        __VA_ARGS__; \
+    } *params = (struct { \
+        void *env; \
+        __VA_ARGS__; \
+    } *)(ptr)
+
 #define PLUGIN_NAME(name) char *plugin_name = name
 #define importFunc(rettype, name) rettype (*name)
 #define exportFunc(name) int name(struct __list *args, ossaCID cid)

@@ -3,6 +3,7 @@
 #include <stdio.h>
 #define MAX_USERID_LENGTH 32
 #include <stdlib.h>
+#include "../core/elfloader/elf_loader.h"
 #include "../core/core.h"
 #ifndef __WIN32
     #include <unistd.h>
@@ -34,9 +35,10 @@ int messageHandler(ossaCID cid, ossaMessage mes){
 }
 
 struct _settings{
-    char    *defaultUsercomsLocaton,
+    char    *defaultUsercomsLocation,
             *config,
-            *plugins;
+            *plugins,
+            *defaultPlugmanLocation;
     unsigned int flags;
 };
 
@@ -127,11 +129,13 @@ int parseSettings(int argc, char **argv, struct _settings *settings){
                 parseSettings(current_Arg, args_structed, settings);
             }
         } else if(!strcmp(argv[i], "--usercoms") || !strcmp(argv[i], "-U" )){
-            settings->defaultUsercomsLocaton = argv[++i];
+            settings->defaultUsercomsLocation = argv[++i];
         } else if(!strcmp(argv[i], "--allow-kfp") || !strcmp(argv[i], "-K" )) {
             settings->flags |= OSSA_CLI_ALLOW_KFP;
         } else if(!strcmp(argv[i], "--plugpath") || !strcmp(argv[i], "-p")){
             settings->plugins = argv[++i];
+        } else if(!strcmp(argv[i], "--plugman") || !strcmp(argv[i], "-M")){
+            settings->defaultPlugmanLocation = argv[++i];
         }
         else {
             printf("Usage here\n");
@@ -141,7 +145,7 @@ int parseSettings(int argc, char **argv, struct _settings *settings){
 
 int main(int argc, char **argv){
 
-    struct _settings settings = {0x0,0x0,0x0};
+    struct _settings settings = {0x0,0x0,0x0, 0x0};
 
     { //Default settings
         #ifndef __WIN32
@@ -197,11 +201,23 @@ int main(int argc, char **argv){
     ossalist(struct ossaChat) chats = makeEmptyList();
     ossalist(struct ossaPlugin) plugins = makeEmptyList();
 
+    initHeap(0x0);
+    pushToHeap("chats", &chats);
+    pushToHeap("plugins", &plugins);
+    pushToHeap("settings", &settings);
+    pushToHeap("currentChat", &currentChat);
+
     { /* loading user-space commands */
-        if(loadChatPlugin((struct ossaPlugin *)listResolve(&plugins, sizeof(struct ossaPlugin)), settings.defaultUsercomsLocaton) == -1 ||
+        if(loadPlugin((struct ossaPlugin *)listResolve(&plugins, sizeof(struct ossaPlugin)), settings.defaultUsercomsLocation) == -1 ||
             listGet(&plugins, 0) == 0x0){
             //Failed to load sysplugin
-            printf("[!!] OSSA Client: Failed to load system plugin at %s\n", settings.defaultUsercomsLocaton);
+            printf("[!!] OSSA Client: Failed to load system plugin at %s\n", settings.defaultUsercomsLocation);
+            return -1;
+        }
+        if(loadPlugin((struct ossaPlugin *)listResolve(&plugins, sizeof(struct ossaPlugin)), settings.defaultPlugmanLocation) == -1 ||
+           listGet(&plugins, 0) == 0x0){
+            //Failed to load sysplugin
+            printf("[!!] OSSA Client: Failed to load system plugin at %s\n", settings.defaultPlugmanLocation);
             return -1;
         }
 
@@ -209,10 +225,10 @@ int main(int argc, char **argv){
             uname = malloc(strlen("user"));
             strcpy(uname, "user");
         }
-
-        *((ossalist(struct ossaChat)**)(dlsym(((struct ossaPlugin*)listGet(&plugins, 0))->libEntity, "chats"))) = &chats;
-        *((ossalist(struct ossaPlugin)**)(dlsym(((struct ossaPlugin*)listGet(&plugins, 0))->libEntity, "plugins"))) = &plugins;
-        *((struct _settings**)(dlsym(((struct ossaPlugin*)listGet(&plugins, 0))->libEntity, "settings"))) = &settings;
+        //Deprecated
+//        *((ossalist(struct ossaChat)**)(dlsym(((struct ossaPlugin*)listGet(&plugins, 0))->libEntity, "chats"))) = &chats;
+//        *((ossalist(struct ossaPlugin)**)(dlsym(((struct ossaPlugin*)listGet(&plugins, 0))->libEntity, "plugins"))) = &plugins;
+//        *((struct _settings**)(dlsym(((struct ossaPlugin*)listGet(&plugins, 0))->libEntity, "settings"))) = &settings;
 
         struct ossaChat syschat = makeChat("sys", (struct ossaPlugin*)listGet(&plugins, 0));
 
@@ -234,8 +250,6 @@ int main(int argc, char **argv){
         /* later */
     }
     currentChat = listGet(&chats, 0);
-    *(struct ossaChat***)(dlsym(((struct ossaPlugin*)listGet(&plugins, 0))->libEntity, "currentChat")) = &currentChat;
-
     ossalist(ossastr) ibuffer = makeEmptyList();
 
     while(1){

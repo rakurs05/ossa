@@ -7,6 +7,7 @@
 #define OSSA_ALREADY        0x4
 #define OSSA_NOUSER         0x5
 #define OSSA_BAD_LOGIN      0x6
+#define OSSA_DEPRECATED     0x7
 
 #define OSSA_STATE_ENABLE   1<<0
 #define OSSA_STATE_ACTIVE   1<<1

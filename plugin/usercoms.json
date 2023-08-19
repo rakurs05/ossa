@@ -1,0 +1,72 @@
+{
+  "commands-politics": {
+    "<": "error",
+    ">": "ignore",
+    "=": "ignore",
+    "type": "cast",
+    "multiply": "repeat"
+  },
+  "commands": [
+    {
+      "command": "load",
+      "description": "Load plugin from file",
+      "arguments": [
+        {
+          "order": "any",
+          "format": "%file:path%",
+          "required": true
+        },
+        {
+          "order": "any",
+          "format": "-%string:flags%",
+          "required": false
+        }
+      ],
+      "call": "pluginLoad(%path%, %flags%)"
+    },
+    {
+      "command": "unload",
+      "description": "Unload plugin",
+      "arguments": [
+        {
+          "order": "0",
+          "format": "%string:plugin%",
+          "required": true,
+          "multiply": true
+        }
+      ],
+      "call": "pluginUnload(%plugin%)"
+    },
+    {
+      "command": "install",
+      "description": "Install plugin from repo",
+      "arguments": [
+        {
+          "order": "0",
+          "format": "%string:pluginName%@%url:repo=\"https://raw.githubusercontent.com/rakurs05/ossa/plugins.json\"%",
+          "required": true,
+          "multiply": true
+        }
+      ],
+      "call": "webInstallPlugin(%repo%, \"zip\", %pluginName%)"
+    },
+    {
+      "command": "state",
+      "description": "Check state of plugin",
+      "arguments": [],
+      "call": "currentPluginState()"
+    },
+    {
+      "command": "auth",
+      "description": "Auth in plugin",
+      "arguments": [
+        {
+          "order": "any",
+          "format": "%string:login%@%string:password%",
+          "required": true
+        }
+      ],
+      "call": "currentPluginAuth(%login%, %password%);"
+    }
+  ]
+}

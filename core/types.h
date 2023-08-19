@@ -68,16 +68,23 @@ struct ossaChat{
     struct ossaPlugin *plugin;
 };
 
-struct SymbolList{
+//for plugins types: s - string, c - char, i - int, l - long, p - plugin pointer, f - string path to file P - pointer d - float/double
+struct ossaSymbol{
     char *type;
     void *data;
-    struct SymbolList* next;
+    struct ossaSymbol* next;
+};
+
+struct ossaUsercom{
+    char *com, *descr, **args;
+    void (*exec)(void *ptr);
+    struct ossaUsercom *next;
 };
 
 struct ossaPlugin{
     //Shared data
     void *libEntity;
-    struct SymbolList sl;
+    struct ossaUsercom *usercoms;
     struct __PLUGIN_CALLS__ pcall;
     //Structure calls
     int (*init)();

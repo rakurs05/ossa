@@ -23,4 +23,6 @@
 #define OSSA_AUTHTYPE_LOGIN    0x0
 #define OSSA_AUTHTYPE_OAUTH    0x1
 
+
+
 #endif
